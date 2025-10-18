@@ -15,7 +15,7 @@ import uvicorn
 
 from app.core.config import settings, engine
 from app.models.database import Base
-from app.routes import strategy, mlops, chat, files, health
+from app.routes import strategy, mlops, chat, files, health, config
 
 
 # Lifespan context manager for startup/shutdown
@@ -286,6 +286,7 @@ app.include_router(mlops.router)
 app.include_router(chat.router)
 app.include_router(chat.providers_router)  # Provider models endpoint
 app.include_router(files.router)
+app.include_router(config.router)  # Agent configuration and Replit auth
 
 
 # ============================================================================

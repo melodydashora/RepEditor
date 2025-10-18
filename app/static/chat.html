@@ -234,6 +234,130 @@
             font-family: 'Courier New', monospace;
             font-size: 0.9em;
         }
+        .settings-btn {
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            font-size: 1.2em;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 45px;
+            height: 45px;
+        }
+        .settings-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: rotate(90deg);
+        }
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .modal-content {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            animation: slideIn 0.3s ease;
+            border: 1px solid #334155;
+        }
+        .modal-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #334155;
+        }
+        .modal-header h2 {
+            color: #667eea;
+            font-size: 1.5em;
+            margin: 0;
+        }
+        .modal-body {
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #e2e8f0;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #334155;
+            border-radius: 8px;
+            background: #0f172a;
+            color: #e2e8f0;
+            font-size: 1em;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: #667eea;
+        }
+        .form-group select option {
+            background: #1e293b;
+            color: #e2e8f0;
+        }
+        .modal-footer {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+        .modal-footer button {
+            padding: 12px 24px;
+            font-size: 0.95em;
+        }
+        .btn-secondary {
+            background: #334155 !important;
+        }
+        .btn-secondary:hover {
+            background: #475569 !important;
+        }
+        .btn-connect {
+            background: #10b981 !important;
+            margin-bottom: 10px;
+        }
+        .btn-connect:hover {
+            background: #059669 !important;
+        }
     </style>
 </head>
 <body>
@@ -258,6 +382,9 @@
                     <select id="paramValueSelect" onchange="onParamValueChange()" style="display: none;">
                         <option value="">Select Value</option>
                     </select>
+                    <button class="settings-btn" onclick="openSettings()" title="Settings">
+                        ⚙️
+                    </button>
                 </div>
             </div>
 
@@ -301,6 +428,38 @@
             </div>
             <div class="file-tree" id="fileTree">
                 <div style="color: #64748b; font-style: italic;">Loading file tree...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="settingsModal" onclick="closeModalOnBackdrop(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <span style="font-size: 1.5em;">⚙️</span>
+                <h2>Replit Settings</h2>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="replitUsername">Replit Username</label>
+                    <input type="text" id="replitUsername" placeholder="Enter your Replit username">
+                </div>
+                <div class="form-group">
+                    <label for="replitPassword">Replit Password</label>
+                    <input type="password" id="replitPassword" placeholder="Enter your Replit password">
+                </div>
+                <div class="form-group">
+                    <label for="replitApp">Replit App</label>
+                    <select id="replitApp">
+                        <option value="">Select app to work on</option>
+                    </select>
+                </div>
+                <button onclick="connectReplitApp()" class="btn-connect" style="width: 100%;">
+                    Connect
+                </button>
+            </div>
+            <div class="modal-footer">
+                <button onclick="closeSettings()" class="btn-secondary">Close</button>
+                <button onclick="saveSettings()">Save Settings</button>
             </div>
         </div>
     </div>
@@ -604,8 +763,99 @@
             sendMessage();
         }
 
+        // Settings modal functions
+        function openSettings() {
+            const modal = document.getElementById('settingsModal');
+            modal.classList.add('active');
+        }
+
+        function closeSettings() {
+            const modal = document.getElementById('settingsModal');
+            modal.classList.remove('active');
+        }
+
+        function closeModalOnBackdrop(event) {
+            if (event.target === event.currentTarget) {
+                closeSettings();
+            }
+        }
+
+        async function connectReplitApp() {
+            const username = document.getElementById('replitUsername').value.trim();
+            const password = document.getElementById('replitPassword').value.trim();
+            const app = document.getElementById('replitApp').value;
+
+            if (!username || !password) {
+                alert('Please enter both username and password');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/config/replit/connect', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        username, 
+                        password,
+                        app: app || null
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    alert('Successfully connected to Replit!');
+                    if (data.apps && data.apps.length > 0) {
+                        const appSelect = document.getElementById('replitApp');
+                        appSelect.innerHTML = '<option value="">Select app to work on</option>';
+                        data.apps.forEach(appName => {
+                            const option = document.createElement('option');
+                            option.value = appName;
+                            option.textContent = appName;
+                            appSelect.appendChild(option);
+                        });
+                    }
+                } else {
+                    alert(`Connection failed: ${data.error || 'Unknown error'}`);
+                }
+            } catch (error) {
+                alert(`Error connecting to Replit: ${error.message}`);
+            }
+        }
+
+        function saveSettings() {
+            const username = document.getElementById('replitUsername').value.trim();
+            const app = document.getElementById('replitApp').value;
+            
+            if (username) {
+                localStorage.setItem('replitUsername', username);
+            }
+            if (app) {
+                localStorage.setItem('replitApp', app);
+            }
+            
+            alert('Settings saved!');
+            closeSettings();
+        }
+
+        // Load saved settings on page load
+        function loadSavedSettings() {
+            const savedUsername = localStorage.getItem('replitUsername');
+            const savedApp = localStorage.getItem('replitApp');
+            
+            if (savedUsername) {
+                document.getElementById('replitUsername').value = savedUsername;
+            }
+            if (savedApp) {
+                document.getElementById('replitApp').value = savedApp;
+            }
+        }
+
         // Load file tree on page load
-        window.addEventListener('load', loadFileTree);
+        window.addEventListener('load', () => {
+            loadFileTree();
+            loadSavedSettings();
+        });
     </script>
 </body>
 </html>
