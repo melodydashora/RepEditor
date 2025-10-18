@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     # API Keys
     ANTHROPIC_API_KEY: str = os.getenv("ANTHROPIC_API_KEY", "")
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
+    OPENAISDK_API_KEY: str = os.getenv("OPENAISDK_API_KEY", "")  # For AI Assistant Builder
     GOOGLEAQ_API_KEY: str = os.getenv("GOOGLEAQ_API_KEY", "")
     GOOGLE_MAPS_API_KEY: Optional[str] = os.getenv("GOOGLE_MAPS_API_KEY")
     PERPLEXITY_API_KEY: Optional[str] = os.getenv("PERPLEXITY_API_KEY")

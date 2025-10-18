@@ -488,7 +488,11 @@ async def chat_with_assistant(request: ChatRequest):
     - Analyze and refactor code
     """
     try:
-        client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
+        # Use OPENAISDK_API_KEY for AI Assistant Builder
+        api_key = settings.OPENAISDK_API_KEY or settings.OPENAI_API_KEY
+        if not api_key:
+            raise HTTPException(status_code=500, detail="OPENAISDK_API_KEY not configured")
+        client = AsyncOpenAI(api_key=api_key)
         
         system_prompt = """You are the Vecto Pilot AI Assistant. You have direct file access and can read/write code.
 
@@ -791,8 +795,11 @@ async def get_provider_models(provider: str):
     """
     try:
         if provider == "openai":
-            # Fetch OpenAI models using API key
-            client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
+            # Fetch OpenAI models using OPENAISDK_API_KEY
+            api_key = settings.OPENAISDK_API_KEY or settings.OPENAI_API_KEY
+            if not api_key:
+                raise HTTPException(status_code=500, detail="OPENAISDK_API_KEY not configured")
+            client = AsyncOpenAI(api_key=api_key)
             models_response = await client.models.list()
             
             # Filter to chat models only and format response
