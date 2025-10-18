@@ -10,14 +10,15 @@ router = APIRouter(prefix="/api/files", tags=["files"])
 
 
 def build_tree(directory: str = ".", prefix: str = "") -> List[Dict[str, Any]]:
-    """Build a tree structure of files and directories"""
+    """Build a tree structure of files and directories (matching Replit behavior)"""
     items = []
     try:
         paths = sorted(Path(directory).iterdir(), key=lambda p: (not p.is_dir(), p.name))
         
         for path in paths:
-            # Skip hidden files and common ignore patterns
-            if path.name.startswith('.') or path.name in ['__pycache__', 'node_modules', 'venv', '.git']:
+            # Only skip large build artifacts and version control
+            # Show hidden files (like .env, .replit, etc.) to match Replit's file tree
+            if path.name in ['__pycache__', 'node_modules', '.git', 'venv', '.venv', 'dist', 'build']:
                 continue
             
             item = {
