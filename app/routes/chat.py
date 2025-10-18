@@ -7,6 +7,7 @@ import json
 import os
 import subprocess
 from pathlib import Path
+import httpx
 
 from openai import AsyncOpenAI
 from app.core.config import settings
@@ -699,40 +700,86 @@ Act directly. Use tools, don't describe using them."""
         uses_responses_api = any(x in model for x in ['codex', 'audio', 'realtime', 'image-', 'search'])
         
         if uses_responses_api:
-            # Models that use /v1/responses API (no tool support, simpler interface)
-            request_kwargs = {
+            # Models that use /v1/responses API (codex, audio, realtime, image, search)
+            # These require direct HTTP API calls since SDK doesn't support /v1/responses
+            api_key = settings.OPENAISDK_API_KEY or settings.OPENAI_API_KEY
+            if not api_key:
+                raise HTTPException(status_code=500, detail="API key not configured")
+            
+            # Build request body for /v1/responses
+            request_body = {
                 "model": model,
-                "input": request.message,  # Single message, not conversation
+                "input": request.message,  # Simplified input format
             }
             
-            # Add parameters if present
+            # Add parameters if present (note: /v1/responses has different params than chat)
             if "temperature" in params:
-                request_kwargs["temperature"] = float(params["temperature"])
-            if "max_tokens" in params:
-                request_kwargs["max_tokens"] = int(params["max_tokens"])
-            else:
-                request_kwargs["max_tokens"] = 4000
+                request_body["temperature"] = float(params["temperature"])
             
-            # Call responses API (note: no tool support for these models)
-            # Since OpenAI SDK might not have .responses, we'll fall back to chat API with a warning
+            # Call OpenAI /v1/responses endpoint directly
             try:
-                response = await client.chat.completions.create(
-                    model=model,
-                    messages=messages,
-                    max_tokens=request_kwargs.get("max_tokens", 4000),
-                    temperature=request_kwargs.get("temperature", 0.7)
-                )
-                response_message = response.choices[0].message
-                final_content = response_message.content or "Response generated."
-                
-                return ChatResponse(
-                    response=f"⚠️ Note: {model} is a specialized model with limited chat support.\n\n{final_content}",
-                    tool_calls=None
+                async with httpx.AsyncClient(timeout=60.0) as http_client:
+                    response = await http_client.post(
+                        "https://api.openai.com/v1/responses",
+                        headers={
+                            "Authorization": f"Bearer {api_key}",
+                            "Content-Type": "application/json"
+                        },
+                        json=request_body
+                    )
+                    response.raise_for_status()
+                    
+                    # Parse JSON response
+                    try:
+                        data = response.json()
+                    except Exception:
+                        # If not JSON, return raw text
+                        return ChatResponse(
+                            response=f"🔧 {model}\n\n{response.text}",
+                            tool_calls=None
+                        )
+                    
+                    # Extract response text from /v1/responses format
+                    # Codex returns: [{'type': 'reasoning', ...}, {'type': 'message', 'content': [{'text': '...'}]}]
+                    output_text = None
+                    
+                    if isinstance(data, list):
+                        # Find the message object in the response array
+                        for item in data:
+                            if isinstance(item, dict) and item.get("type") == "message":
+                                content_list = item.get("content", [])
+                                for content_item in content_list:
+                                    if isinstance(content_item, dict) and content_item.get("type") == "output_text":
+                                        output_text = content_item.get("text")
+                                        break
+                                if output_text:
+                                    break
+                    elif isinstance(data, dict):
+                        # Single object response format
+                        output_text = data.get("output") or data.get("text") or data.get("response")
+                    
+                    # Fallback if no text extracted
+                    if not output_text:
+                        output_text = json.dumps(data, indent=2)
+                    
+                    # Ensure output_text is a string
+                    if not isinstance(output_text, str):
+                        output_text = str(output_text)
+                    
+                    return ChatResponse(
+                        response=output_text,
+                        tool_calls=None
+                    )
+            except httpx.HTTPStatusError as e:
+                error_detail = e.response.json() if e.response.content else str(e)
+                raise HTTPException(
+                    status_code=e.response.status_code, 
+                    detail=f"{model} API error: {error_detail}"
                 )
             except Exception as e:
                 raise HTTPException(
-                    status_code=400, 
-                    detail=f"Model {model} requires /v1/responses endpoint. Error: {str(e)}"
+                    status_code=500, 
+                    detail=f"{model} request failed: {str(e)}"
                 )
         
         # Standard chat/completions models with tool support
