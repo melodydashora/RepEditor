@@ -460,12 +460,14 @@ You are an autonomous coding agent with complete repository knowledge. Act direc
         messages.append({"role": "user", "content": request.message})
         
         # Initial GPT-5 call with tools
+        reasoning_effort = settings.OPENAI_REASONING_EFFORT if hasattr(settings, 'OPENAI_REASONING_EFFORT') else "medium"
         response = await client.chat.completions.create(
             model="gpt-5",
             messages=messages,
             tools=TOOLS,
             tool_choice="auto",
-            max_completion_tokens=4000
+            max_completion_tokens=4000,
+            reasoning_effort=reasoning_effort
         )
         
         response_message = response.choices[0].message
@@ -499,7 +501,8 @@ You are an autonomous coding agent with complete repository knowledge. Act direc
             final_response = await client.chat.completions.create(
                 model="gpt-5",
                 messages=messages,
-                max_completion_tokens=4000
+                max_completion_tokens=4000,
+                reasoning_effort=reasoning_effort
             )
             
             final_content = final_response.choices[0].message.content
