@@ -732,45 +732,37 @@ Act directly. Use tools, don't describe using them."""
                     
                     # Parse JSON response
                     response_text = response.text
-                    print(f"[DEBUG] Raw response text type: {type(response_text)}")
-                    print(f"[DEBUG] Raw response text (first 500 chars): {response_text[:500]}")
                     
-                    # Try parsing as JSON first
+                    # Parse the response
                     try:
                         data = json.loads(response_text)
-                        print(f"[DEBUG] Parsed as JSON successfully, type: {type(data)}")
-                    except json.JSONDecodeError as e:
-                        print(f"[DEBUG] JSON parse failed: {e}")
-                        # If JSON fails, try Python literal (single quotes)
-                        try:
-                            data = ast.literal_eval(response_text)
-                            print(f"[DEBUG] Parsed as Python literal, type: {type(data)}")
-                        except Exception as e2:
-                            print(f"[DEBUG] Python literal parse failed: {e2}")
-                            # If both fail, return raw text
-                            return ChatResponse(response=response_text, tool_calls=None)
+                    except json.JSONDecodeError:
+                        return ChatResponse(response=response_text, tool_calls=None)
                     
-                    # Extract text from codex response format
-                    # Format: [{'type': 'reasoning', ...}, {'type': 'message', 'content': [{'type': 'output_text', 'text': '...'}]}]
+                    # Extract text from /v1/responses format
+                    # Response structure: {"id": "...", "output": [{"type": "message", "content": [{"type": "output_text", "text": "..."}]}]}
                     output_text = None
                     
-                    if isinstance(data, list):
-                        # Find the message item
-                        for item in data:
-                            if isinstance(item, dict) and item.get("type") == "message":
-                                content_list = item.get("content", [])
-                                if isinstance(content_list, list):
-                                    for content_item in content_list:
-                                        if isinstance(content_item, dict) and content_item.get("type") == "output_text":
-                                            output_text = content_item.get("text")
-                                            break
-                                if output_text:
-                                    break
+                    # Check if response has "output" field (new /v1/responses format)
+                    if isinstance(data, dict) and "output" in data:
+                        output_array = data["output"]
+                        if isinstance(output_array, list):
+                            # Find the message item in the output array
+                            for item in output_array:
+                                if isinstance(item, dict) and item.get("type") == "message":
+                                    content_list = item.get("content", [])
+                                    if isinstance(content_list, list):
+                                        for content_item in content_list:
+                                            if isinstance(content_item, dict) and content_item.get("type") == "output_text":
+                                                output_text = content_item.get("text")
+                                                break
+                                    if output_text:
+                                        break
+                    # Fallback: try direct field access
                     elif isinstance(data, dict):
-                        # Single object format
-                        output_text = data.get("output") or data.get("text") or data.get("response")
+                        output_text = data.get("text") or data.get("response") or data.get("content")
                     
-                    # If we still don't have text, show formatted JSON
+                    # If still no text, show formatted JSON
                     if not output_text:
                         output_text = json.dumps(data, indent=2)
                     

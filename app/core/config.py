@@ -33,9 +33,9 @@ class Settings(BaseSettings):
     UI_ORIGIN: str = os.getenv("UI_ORIGIN", "https://vectopilot.com")
     
     # AI Model Configuration (GPT-5 single-path Triad)
-    STRATEGIST_MODEL: str = os.getenv("STRATEGIST_MODEL", "claude-sonnet-4-20250514")
+    STRATEGIST_MODEL: str = os.getenv("STRATEGIST_MODEL", "claude-sonnet-4-5-20250929")
     PLANNER_MODEL: str = os.getenv("PLANNER_MODEL", "gpt-5")
-    VALIDATOR_MODEL: str = os.getenv("VALIDATOR_MODEL", "gemini-2.0-flash-001")
+    VALIDATOR_MODEL: str = os.getenv("VALIDATOR_MODEL", "gemini-2.5-pro-latest")
     
     # Model parameters
     OPENAI_MAX_COMPLETION_TOKENS: Optional[int] = int(os.getenv("OPENAI_MAX_COMPLETION_TOKENS", "16000")) if os.getenv("OPENAI_MAX_COMPLETION_TOKENS") else None
@@ -45,7 +45,7 @@ class Settings(BaseSettings):
     
     # Triad Pipeline Configuration
     TRIAD_STRATEGIST_PROVIDER: str = "anthropic"
-    TRIAD_STRATEGIST_MODEL: str = os.getenv("TRIAD_STRATEGIST_MODEL", "claude-sonnet-4-20250514")
+    TRIAD_STRATEGIST_MODEL: str = os.getenv("TRIAD_STRATEGIST_MODEL", "claude-sonnet-4-5-20250929")
     TRIAD_STRATEGIST_TEMPERATURE: float = float(os.getenv("TRIAD_STRATEGIST_TEMPERATURE", "0.7"))
     TRIAD_STRATEGIST_MAX_OUTPUT_TOKENS: int = int(os.getenv("TRIAD_STRATEGIST_MAX_OUTPUT_TOKENS", "32000"))
     TRIAD_STRATEGIST_TIMEOUT_MS: int = int(os.getenv("TRIAD_STRATEGIST_TIMEOUT_MS", "90000"))
