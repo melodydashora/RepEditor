@@ -276,7 +276,7 @@ async def github_oauth_callback(
     
     async with httpx.AsyncClient() as client:
         headers = {
-            "Authorization": f"Bearer {access_token}",
+            "Authorization": f"token {access_token}",
             "Accept": "application/vnd.github.v3+json"
         }
         response = await client.get("https://api.github.com/user", headers=headers)
@@ -338,7 +338,7 @@ async def github_token_login(
     """Login with GitHub Personal Access Token"""
     async with httpx.AsyncClient() as client:
         headers = {
-            "Authorization": f"Bearer {data.token}",
+            "Authorization": f"token {data.token}",
             "Accept": "application/vnd.github.v3+json"
         }
         response = await client.get("https://api.github.com/user", headers=headers)
@@ -411,7 +411,7 @@ async def get_github_repos(
     
     async with httpx.AsyncClient() as client:
         headers = {
-            "Authorization": f"Bearer {session.github_token}",
+            "Authorization": f"token {session.github_token}",
             "Accept": "application/vnd.github.v3+json"
         }
         response = await client.get(
