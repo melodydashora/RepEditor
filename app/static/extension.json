@@ -1,103 +1,39 @@
 {
-  "id": "gpt-repo-access",
-  "name": "Vecto Pilot AI 🚀",
-  "version": "1.0.0",
-  "description": "GPT-5 with full repository superpowers - read files, edit code, run commands, access databases, and more!",
+  "name": "GPT Repository Access",
+  "description": "Direct GPT-5 access with full repository control — read files, edit code, run commands.",
+  "longDescription": "Vecto Pilot AI (Unified SDK • GPT-5) plans → diffs → commits.\n- Browser holds your GitHub token (PAT or Device Flow)\n- Server clones per-request, applies unified diff, pushes branch, opens PR\n- Optional local-Repl FS bridge via experimental APIs",
   "icon": "/icon.svg",
-  "permissions": [
-    "read",
-    "write-exec",
-    "repldb:read",
-    "repldb:write",
-    "experimental-api",
-    "network"
+  "tags": ["ai", "gpt5", "repo", "code", "assistant"],
+  "coverImages": [
+    { "path": "/cover1.png", "label": "Plan → Diff → PR" }
   ],
-  "panels": [
+  "website": "https://dev.melodydashora.dev",
+  "authorEmail": "melody@vectopilot.com",
+  "fileHandlers": [
     {
-      "id": "main",
-      "title": "🤖 Vecto Pilot AI",
-      "icon": "/icon.svg",
-      "html": "/panel.html",
-      "location": "right",
-      "width": 420,
-      "description": "AI-powered repository editor with GPT-5"
-    },
-    {
-      "id": "diff",
-      "title": "📝 Diff Viewer",
-      "icon": "/icon.svg",
-      "html": "/diff.html",
-      "location": "right",
-      "width": 520,
-      "description": "View and analyze code diffs"
+      "glob": "**/*.{diff,patch}",
+      "handler": "/diff.html",
+      "name": "Diff Viewer",
+      "icon": "/icon.svg"
     }
   ],
   "tools": [
     {
-      "name": "🤖 GPT Repository Access",
-      "handler": "/api/chat/frame",
-      "icon": "/icon.svg",
-      "description": "Direct GPT-5 chat interface"
+      "handler": "/panel.html",
+      "name": "Vecto Pilot AI",
+      "icon": "/icon.svg"
     },
     {
-      "name": "✨ Vecto Pilot AI",
-      "handler": "/panel",
-      "icon": "/icon.svg",
-      "description": "Full-featured AI assistant panel"
+      "handler": "/diff.html",
+      "name": "Diff Viewer",
+      "icon": "/icon.svg"
     }
   ],
   "scopes": [
-    {
-      "name": "read",
-      "reason": "Read any file in your repository to understand and analyze code"
-    },
-    {
-      "name": "write-exec",
-      "reason": "Write files and execute commands to fix bugs and implement features"
-    },
-    {
-      "name": "repldb:read",
-      "reason": "Read database keys to analyze application state and data"
-    },
-    {
-      "name": "repldb:write",
-      "reason": "Update database to fix issues and manage application data"
-    },
-    {
-      "name": "experimental-api",
-      "reason": "Access advanced filesystem and process APIs for deep integration"
-    },
-    {
-      "name": "network",
-      "reason": "Connect to AI services and web search for intelligent assistance"
-    }
-  ],
-  "commands": [
-    {
-      "id": "open",
-      "title": "🚀 Open Vecto Pilot AI",
-      "panel": "main",
-      "description": "Launch the AI assistant"
-    },
-    {
-      "id": "openDiff",
-      "title": "📝 Open Diff Viewer",
-      "panel": "diff",
-      "description": "View code changes"
-    }
-  ],
-  "fileHandlers": [
-    {
-      "extensions": ["diff", "patch"],
-      "handler": "/diff",
-      "description": "Open diff files in the viewer"
-    }
-  ],
-  "metadata": {
-    "author": "Vecto Pilot Team",
-    "homepage": "https://dev.melodydashora.dev",
-    "repository": "https://github.com/melodydashora/RepEditor",
-    "license": "MIT",
-    "tags": ["ai", "gpt-5", "code-editor", "repository", "assistant", "developer-tools"]
-  }
+    { "name": "read", "reason": "Read any file in your App" },
+    { "name": "write-exec", "reason": "Write to files and run shell/commands for fixes" },
+    { "name": "repldb:read", "reason": "Load cached plans/diffs for this App" },
+    { "name": "repldb:write", "reason": "Store cached plans/diffs and settings" },
+    { "name": "experimental-api", "reason": "Use experimental fs/process APIs from the pane" }
+  ]
 }
