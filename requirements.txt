@@ -13,3 +13,8 @@ h3
 aiohttp
 aiohttp
 httpx
+bcrypt
+passlib
+python-jose
+authlib
+itsdangerous

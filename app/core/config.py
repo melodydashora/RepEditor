@@ -27,6 +27,11 @@ class Settings(BaseSettings):
     FAA_ASWS_CLIENT_ID: Optional[str] = os.getenv("FAA_ASWS_CLIENT_ID")
     FAA_ASWS_CLIENT_SECRET: Optional[str] = os.getenv("FAA_ASWS_CLIENT_SECRET")
     
+    # GitHub OAuth
+    GITHUB_CLIENT_ID: str = os.getenv("GITHUB_CLIENT_ID", "")
+    GITHUB_CLIENT_SECRET: str = os.getenv("GITHUB_CLIENT_SECRET", "")
+    APP_BASE_URL: str = os.getenv("APP_BASE_URL", "https://dev.melodydashora.dev")
+    
     # Server settings
     PORT: int = int(os.getenv("PORT", "5000"))
     HOST: str = os.getenv("HOST", "0.0.0.0")
