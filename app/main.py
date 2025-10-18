@@ -314,6 +314,13 @@ async def extension_diff_js():
     return FileResponse("public/diff.js")
 
 
+@app.get("/logs.html")
+async def extension_logs():
+    """Extension logs viewer HTML"""
+    from fastapi.responses import FileResponse
+    return FileResponse("public/logs.html")
+
+
 # ============================================================================
 # API ROUTES
 # ============================================================================

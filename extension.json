@@ -1,6 +1,6 @@
 {
-  "name": "My Extension",
-  "description": "My Extension Description",
+  "name": "GPT Repository Access",
+  "description": "Direct GPT-5 access with full repository control — read files, edit code, run commands.",
   "version": "0",
   scopes: [
 
@@ -29,5 +29,6 @@
     reason: "Use experimental APIs that may be unstable, change in behavior, or be removed entirely"
   }
 
-  ]
+  ],
+  longDescription: "Vecto Pilot AI (Unified SDK • GPT-5) plans → diffs → commits.\\n- Browser holds your GitHub token (PAT or Device Flow)\\n- Server clones per-request, applies unified diff, pushes branch, opens PR\\n- Optional local-Repl FS bridge via experimental APIs"
 }

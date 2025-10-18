@@ -7,8 +7,8 @@
   "coverImages": [
     { "path": "/cover1.png", "label": "Plan → Diff → PR" }
   ],
-  "website": "https://dev.melodydashora.dev",
-  "authorEmail": "melody@vectopilot.com",
+  "website": "https://vectopilot.com",
+  "authorEmail": "bot@vectopilot.com",
   "fileHandlers": [
     {
       "glob": "**/*.{diff,patch}",
@@ -24,8 +24,8 @@
       "icon": "/icon.svg"
     },
     {
-      "handler": "/diff.html",
-      "name": "Diff Viewer",
+      "handler": "/logs.html",
+      "name": "Job Logs",
       "icon": "/icon.svg"
     }
   ],
