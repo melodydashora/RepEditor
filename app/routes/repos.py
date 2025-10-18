@@ -136,13 +136,17 @@ async def select_repo(
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to clone repo: {str(e)}")
+        import traceback
+        error_detail = f"Failed to clone repository: {str(e)}\n{traceback.format_exc()}"
+        print(f"[REPO CLONE ERROR] {error_detail}")  # Log to console
+        raise HTTPException(status_code=500, detail=f"Failed to clone repository: {str(e)}")
 
 
 @router.get("/tree")
 async def get_repo_tree(
     repo_path: str = Query(..., description="Full path to repository"),
-    session: AuthSession = Depends(get_current_user),
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
     max_entries: int = Query(8000, le=10000)
 ):
     """
@@ -196,7 +200,7 @@ async def get_repo_tree(
 async def get_file_content(
     repo_path: str = Query(..., description="Repository root path"),
     file_path: str = Query(..., description="Relative file path"),
-    session: AuthSession = Depends(get_current_user)
+    user: User = Depends(get_current_user)
 ):
     """
     Read file content from repository
@@ -234,7 +238,7 @@ async def get_file_content(
 async def git_config(
     request: GitConfigRequest,
     repo_path: str = Form(...),
-    session: AuthSession = Depends(get_current_user)
+    user: User = Depends(get_current_user)
 ):
     """Configure git user name and email for repository"""
     root = Path(repo_path).resolve()
@@ -255,7 +259,7 @@ async def git_config(
 async def git_commit(
     request: GitCommitRequest,
     repo_path: str = Form(...),
-    session: AuthSession = Depends(get_current_user)
+    user: User = Depends(get_current_user)
 ):
     """Stage and commit changes"""
     root = Path(repo_path).resolve()
@@ -279,7 +283,7 @@ async def git_commit(
 async def git_push(
     request: GitPushRequest,
     repo_path: str = Form(...),
-    session: AuthSession = Depends(get_current_user)
+    user: User = Depends(get_current_user)
 ):
     """Push commits to remote"""
     root = Path(repo_path).resolve()
@@ -299,7 +303,7 @@ async def git_push(
 @router.get("/git/status")
 async def git_status(
     repo_path: str = Query(...),
-    session: AuthSession = Depends(get_current_user)
+    user: User = Depends(get_current_user)
 ):
     """Get git status for repository"""
     root = Path(repo_path).resolve()
