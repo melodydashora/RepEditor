@@ -802,10 +802,11 @@ async def get_provider_models(provider: str):
             client = AsyncOpenAI(api_key=api_key)
             models_response = await client.models.list()
             
-            # Filter to chat-compatible models only (exclude codex, audio, realtime, image, search-api)
+            # Show ALL chat models - minimal filtering
+            # Only exclude: dall-e, whisper, tts, embedding, moderation, davinci/babbage (legacy), sora
             excluded_patterns = [
-                "codex", "audio", "realtime", "whisper", "tts", "dall-e", 
-                "embedding", "moderation", "search-api", "image"
+                "dall-e", "whisper", "tts-", "embedding", "moderation", 
+                "davinci", "babbage", "sora", "text-"
             ]
             
             chat_models = [
