@@ -1,0 +1,54 @@
+entrypoint = "gateway-server.js"
+modules = ["nodejs-22", "nodejs-20", "nodejs-18", "postgresql-16", "python-3.11"]
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Vecto API"
+
+[[workflows.workflow]]
+name = "Vecto API"
+author = "agent"
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python3.11 -m uvicorn app.main:app --host 0.0.0.0 --port 5000 --reload"
+waitForPort = 5000
+
+[nix]
+packages = ["c-ares", "cargo", "fontconfig", "ghostscript", "glib", "grpc", "harfbuzz", "jiq", "jq", "jq-lsp", "jql", "libiconv", "libxcrypt", "lsof", "nodejs-18", "nodejs-20", "nodejs-22", "openssl", "pandoc", "pango", "pkg-config", "postgresql", "python312Packages.jq", "python312Packages.xstatic-jquery-ui", "python313Packages.django-jquery-js", "python313Packages.jq", "python313Packages.xstatic-jquery", "rustc", "tree", "undollar", "wkhtmltopdf", "zlib"]
+channel = "stable-25_05"
+
+[agent]
+expertMode = true
+
+[[ports]]
+localPort = 3101
+externalPort = 3003
+exposeLocalhost = true
+
+[[ports]]
+localPort = 3102
+externalPort = 3001
+exposeLocalhost = true
+
+[[ports]]
+localPort = 5000
+externalPort = 80
+
+[deployment]
+run = ["node", "gateway-server.js"]
+
+onBoot = "bash server/scripts/workspace-startup.sh"
+deploymentTarget = "autoscale"
+build = ["npm", "run", "build"]

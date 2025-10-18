@@ -1,0 +1,10 @@
+{
+  "enabled": false,
+  "note": "Repository-level opt-out: disable Replit assistant override for this project. Vecto Pilot AI Assistant SDK (GPT-5) is the authoritative assistant at /api/chat",
+  "migration": {
+    "from": "Eidolon (Claude Sonnet 4.5 Enhanced SDK)",
+    "to": "Vecto Pilot AI Assistant (Unified SDK • GPT-5)",
+    "date": "2025-10-18",
+    "reason": "Merged Agent/Eidolon/Assistant into single GPT-5 unified SDK"
+  }
+}

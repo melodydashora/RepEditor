@@ -1,0 +1,114 @@
+"""
+Configuration and database setup for Vecto Pilot Python backend
+"""
+import os
+from typing import Optional
+from pydantic_settings import BaseSettings
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import NullPool
+
+
+class Settings(BaseSettings):
+    """Application settings from environment variables"""
+    
+    # Database
+    DATABASE_URL: str = os.getenv("DATABASE_URL", "")
+    
+    # API Keys
+    ANTHROPIC_API_KEY: str = os.getenv("ANTHROPIC_API_KEY", "")
+    OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
+    OPENAISDK_API_KEY: str = os.getenv("OPENAISDK_API_KEY", "")  # For AI Assistant Builder
+    GOOGLEAQ_API_KEY: str = os.getenv("GOOGLEAQ_API_KEY", "")
+    GOOGLE_MAPS_API_KEY: Optional[str] = os.getenv("GOOGLE_MAPS_API_KEY")
+    PERPLEXITY_API_KEY: Optional[str] = os.getenv("PERPLEXITY_API_KEY")
+    
+    # FAA Airport Data
+    FAA_ASWS_CLIENT_ID: Optional[str] = os.getenv("FAA_ASWS_CLIENT_ID")
+    FAA_ASWS_CLIENT_SECRET: Optional[str] = os.getenv("FAA_ASWS_CLIENT_SECRET")
+    
+    # GitHub OAuth
+    GITHUB_CLIENT_ID: str = os.getenv("GITHUB_CLIENT_ID", "")
+    GITHUB_CLIENT_SECRET: str = os.getenv("GITHUB_CLIENT_SECRET", "")
+    APP_BASE_URL: str = os.getenv("APP_BASE_URL", "https://dev.melodydashora.dev")
+    
+    # Server settings
+    PORT: int = int(os.getenv("PORT", "5000"))
+    HOST: str = os.getenv("HOST", "0.0.0.0")
+    UI_ORIGIN: str = os.getenv("UI_ORIGIN", "https://vectopilot.com")
+    
+    # AI Model Configuration (GPT-5 single-path Triad)
+    STRATEGIST_MODEL: str = os.getenv("STRATEGIST_MODEL", "claude-sonnet-4-5-20250929")
+    PLANNER_MODEL: str = os.getenv("PLANNER_MODEL", "gpt-5")
+    VALIDATOR_MODEL: str = os.getenv("VALIDATOR_MODEL", "gemini-2.5-pro-latest")
+    
+    # Model parameters
+    OPENAI_MAX_COMPLETION_TOKENS: Optional[int] = int(os.getenv("OPENAI_MAX_COMPLETION_TOKENS", "16000")) if os.getenv("OPENAI_MAX_COMPLETION_TOKENS") else None
+    OPENAI_REASONING_EFFORT: str = os.getenv("OPENAI_REASONING_EFFORT", "high")
+    GPT5_REASONING_EFFORT: str = os.getenv("GPT5_REASONING_EFFORT", "high")
+    OPENAI_BASE_URL: str = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
+    
+    # Triad Pipeline Configuration
+    TRIAD_STRATEGIST_PROVIDER: str = "anthropic"
+    TRIAD_STRATEGIST_MODEL: str = os.getenv("TRIAD_STRATEGIST_MODEL", "claude-sonnet-4-5-20250929")
+    TRIAD_STRATEGIST_TEMPERATURE: float = float(os.getenv("TRIAD_STRATEGIST_TEMPERATURE", "0.7"))
+    TRIAD_STRATEGIST_MAX_OUTPUT_TOKENS: int = int(os.getenv("TRIAD_STRATEGIST_MAX_OUTPUT_TOKENS", "32000"))
+    TRIAD_STRATEGIST_TIMEOUT_MS: int = int(os.getenv("TRIAD_STRATEGIST_TIMEOUT_MS", "90000"))
+    
+    TRIAD_PLANNER_PROVIDER: str = "openai"
+    TRIAD_PLANNER_MODEL: str = os.getenv("TRIAD_PLANNER_MODEL", "gpt-5")
+    TRIAD_PLANNER_TEMPERATURE: float = float(os.getenv("TRIAD_PLANNER_TEMPERATURE", "0.6"))
+    TRIAD_PLANNER_MAX_OUTPUT_TOKENS: int = int(os.getenv("TRIAD_PLANNER_MAX_OUTPUT_TOKENS", "64000"))
+    TRIAD_PLANNER_TIMEOUT_MS: int = int(os.getenv("TRIAD_PLANNER_TIMEOUT_MS", "60000"))
+    
+    TRIAD_VALIDATOR_PROVIDER: str = "google"
+    TRIAD_VALIDATOR_MODEL: str = os.getenv("TRIAD_VALIDATOR_MODEL", "gemini-2.0-flash-001")
+    TRIAD_VALIDATOR_TEMPERATURE: float = float(os.getenv("TRIAD_VALIDATOR_TEMPERATURE", "0.2"))
+    TRIAD_VALIDATOR_MAX_OUTPUT_TOKENS: int = int(os.getenv("TRIAD_VALIDATOR_MAX_OUTPUT_TOKENS", "8192"))
+    TRIAD_VALIDATOR_TIMEOUT_MS: int = int(os.getenv("TRIAD_VALIDATOR_TIMEOUT_MS", "20000"))
+    
+    TRIAD_FAIL_ON_INVALID: bool = os.getenv("TRIAD_FAIL_ON_INVALID", "true").lower() == "true"
+    TRIAD_INVARIANT_WORD_CAPS: bool = os.getenv("TRIAD_INVARIANT_WORD_CAPS", "true").lower() == "true"
+    
+    # Environment
+    NODE_ENV: str = os.getenv("NODE_ENV", "development")
+    REPL_ID: Optional[str] = os.getenv("REPL_ID")
+    REPL_SLUG: Optional[str] = os.getenv("REPL_SLUG")
+    REPL_OWNER: Optional[str] = os.getenv("REPL_OWNER")
+    
+    @property
+    def is_production(self) -> bool:
+        return self.NODE_ENV == "production"
+    
+    @property
+    def is_replit(self) -> bool:
+        return self.REPL_ID is not None
+    
+    model_config = {
+        "env_file": ".env",
+        "case_sensitive": True,
+        "extra": "ignore"  # Allow extra env vars not in Settings model
+    }
+
+
+settings = Settings()
+
+
+# Database engine setup
+engine = create_engine(
+    settings.DATABASE_URL,
+    poolclass=NullPool,  # Replit-friendly: no persistent connections
+    echo=False,  # Set to True for SQL query logging
+    pool_pre_ping=True,  # Verify connections before using
+)
+
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+
+def get_db():
+    """FastAPI dependency for database sessions"""
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
