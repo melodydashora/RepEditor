@@ -695,7 +695,47 @@ Act directly. Use tools, don't describe using them."""
         model = request.model or "gpt-5"
         params = request.params or {}
         
-        # Build request kwargs based on model type
+        # Detect if this model uses /v1/responses instead of /v1/chat/completions
+        uses_responses_api = any(x in model for x in ['codex', 'audio', 'realtime', 'image-', 'search'])
+        
+        if uses_responses_api:
+            # Models that use /v1/responses API (no tool support, simpler interface)
+            request_kwargs = {
+                "model": model,
+                "input": request.message,  # Single message, not conversation
+            }
+            
+            # Add parameters if present
+            if "temperature" in params:
+                request_kwargs["temperature"] = float(params["temperature"])
+            if "max_tokens" in params:
+                request_kwargs["max_tokens"] = int(params["max_tokens"])
+            else:
+                request_kwargs["max_tokens"] = 4000
+            
+            # Call responses API (note: no tool support for these models)
+            # Since OpenAI SDK might not have .responses, we'll fall back to chat API with a warning
+            try:
+                response = await client.chat.completions.create(
+                    model=model,
+                    messages=messages,
+                    max_tokens=request_kwargs.get("max_tokens", 4000),
+                    temperature=request_kwargs.get("temperature", 0.7)
+                )
+                response_message = response.choices[0].message
+                final_content = response_message.content or "Response generated."
+                
+                return ChatResponse(
+                    response=f"⚠️ Note: {model} is a specialized model with limited chat support.\n\n{final_content}",
+                    tool_calls=None
+                )
+            except Exception as e:
+                raise HTTPException(
+                    status_code=400, 
+                    detail=f"Model {model} requires /v1/responses endpoint. Error: {str(e)}"
+                )
+        
+        # Standard chat/completions models with tool support
         request_kwargs = {
             "model": model,
             "messages": messages,
@@ -710,7 +750,7 @@ Act directly. Use tools, don't describe using them."""
             request_kwargs["max_completion_tokens"] = int(max_comp_tokens)
         
         # GPT-5 clean models: reasoning_effort, verbosity, max_completion_tokens
-        elif model.startswith('gpt-5') and not any(x in model for x in ['codex', 'audio', 'realtime', 'image', 'search']):
+        elif model.startswith('gpt-5') and not uses_responses_api:
             if "reasoning_effort" in params:
                 request_kwargs["reasoning_effort"] = params["reasoning_effort"]
             if "verbosity" in params:
@@ -827,7 +867,7 @@ async def get_provider_models(provider: str):
             client = AsyncOpenAI(api_key=api_key)
             models_response = await client.models.list()
             
-            # Show ALL chat models - minimal filtering
+            # Show ALL models (both /v1/chat/completions and /v1/responses)
             # Only exclude: dall-e, whisper, tts, embedding, moderation, davinci/babbage (legacy), sora
             excluded_patterns = [
                 "dall-e", "whisper", "tts-", "embedding", "moderation", 

@@ -57,9 +57,27 @@
         .tree-folder {
             color: #fbbf24;
             font-weight: 600;
+            cursor: pointer;
+            user-select: none;
+        }
+        .tree-folder:hover {
+            background: rgba(255, 255, 255, 0.05);
         }
         .tree-file {
             color: #94a3b8;
+            cursor: pointer;
+        }
+        .tree-file:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .folder-arrow {
+            display: inline-block;
+            width: 12px;
+            font-size: 10px;
+            transition: transform 0.2s ease;
+        }
+        .tree-children {
+            transition: all 0.2s ease;
         }
         .tree-children {
             margin-left: 16px;
@@ -524,29 +542,49 @@
             }
         }
 
-        function renderTree(items, level = 0) {
+        function renderTree(items, level = 0, parentId = '') {
             if (!items || items.length === 0) return '';
             
             let html = '';
-            items.forEach(item => {
+            items.forEach((item, index) => {
+                const itemId = `${parentId}-${index}`;
                 const indent = '  '.repeat(level);
-                const icon = item.type === 'directory' ? '📁' : '📄';
-                const className = item.type === 'directory' ? 'tree-folder' : 'tree-file';
+                const hasChildren = item.children && item.children.length > 0;
                 
-                const onClick = item.type === 'file' ? `onclick="readFileFromTree('${item.path}')"` : '';
-                
-                html += `<div class="tree-item ${className}" ${onClick} title="${item.path}">`;
-                html += `${indent}${icon} ${item.name}`;
-                html += `</div>`;
-                
-                if (item.children && item.children.length > 0) {
-                    html += `<div class="tree-children">`;
-                    html += renderTree(item.children, level + 1);
+                if (item.type === 'directory') {
+                    // Directory: expandable/collapsible
+                    const arrow = hasChildren ? '▶' : '';
+                    const folderIcon = '📁';
+                    
+                    html += `<div class="tree-item tree-folder" onclick="toggleFolder('${itemId}')" title="${item.path}">`;
+                    html += `${indent}<span id="arrow-${itemId}" class="folder-arrow">${arrow}</span> ${folderIcon} ${item.name}`;
+                    html += `</div>`;
+                    
+                    if (hasChildren) {
+                        html += `<div id="children-${itemId}" class="tree-children" style="display: none;">`;
+                        html += renderTree(item.children, level + 1, itemId);
+                        html += `</div>`;
+                    }
+                } else {
+                    // File: clickable
+                    html += `<div class="tree-item tree-file" onclick="readFileFromTree('${item.path}')" title="${item.path}">`;
+                    html += `${indent}📄 ${item.name}`;
                     html += `</div>`;
                 }
             });
             
             return html;
+        }
+        
+        function toggleFolder(folderId) {
+            const childrenDiv = document.getElementById(`children-${folderId}`);
+            const arrowSpan = document.getElementById(`arrow-${folderId}`);
+            
+            if (childrenDiv) {
+                const isHidden = childrenDiv.style.display === 'none';
+                childrenDiv.style.display = isHidden ? 'block' : 'none';
+                arrowSpan.textContent = isHidden ? '▼' : '▶';
+            }
         }
 
         function readFileFromTree(filePath) {
