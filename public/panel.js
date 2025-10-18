@@ -1,155 +1,62 @@
-// Vecto Pilot AI - Extension Panel Script
-const APP_ORIGIN = window.location.origin;
-const IFRAME_URL = `${APP_ORIGIN}/api/chat/frame`;
+// --- CONFIG ---
+const APP_ORIGIN = "https://dev.melodydashora.dev"; // your hosted UI
+const IFRAME_URL = `${APP_ORIGIN}/?embed=1`;
 
-const app = document.getElementById("app");
-const statusEl = document.getElementById("status");
-const loadingEl = document.getElementById("loading");
-
-// Open full app in new window
-document.getElementById("open").onclick = () => {
-  window.open(APP_ORIGIN, "_blank", "noopener");
-};
-
-// Load GPT frame
-app.onload = () => {
-  loadingEl.style.display = "none";
-};
+const app  = document.getElementById("app");
+const ctx  = document.getElementById("ctx");
+document.getElementById("open").onclick = () => window.open(APP_ORIGIN, "_blank", "noopener");
 app.src = IFRAME_URL;
 
-// Import Replit experimental APIs (if available)
-import("@replit/extensions").then(({ experimental }) => {
-  const { auth, fs, process: proc } = experimental ?? {};
-  
-  // Authenticate and show user info
-  (async () => {
-    try {
-      if (auth) {
-        const { user } = await auth.authenticate();
-        if (user?.username) {
-          statusEl.textContent = `● ${user.username}`;
-          statusEl.style.background = "rgba(102,126,234,0.15)";
-          statusEl.style.borderColor = "rgba(102,126,234,0.3)";
-          statusEl.style.color = "#667EEA";
-        }
-        
-        // Send user context to iframe
-        const jwt = await auth.getAuthToken().catch(() => null);
-        app.contentWindow?.postMessage({ 
-          type: "replit-user", 
-          user, 
-          jwt 
-        }, APP_ORIGIN);
-      }
-    } catch (err) {
-      console.log("[Vecto] Auth not available:", err);
-    }
-  })();
+// Try to use Replit Extensions API if available; degrade gracefully if not.
+let ext = null;
+(async () => {
+  try { ext = await import("@replit/extensions"); }
+  catch { try { ext = await import("https://esm.sh/@replit/extensions@latest"); } catch {} }
 
-  // Direct Repl FS access bridge
-  if (fs && proc) {
-    // Helper functions for file operations
-    async function readFile(path) {
+  // Identity (nice-to-have; not required for Git flow)
+  try {
+    const { experimental } = ext || {};
+    const { auth } = experimental || {};
+    if (auth?.authenticate) {
+      const { user } = await auth.authenticate();
+      ctx.textContent = `replit:${user?.id ?? "unknown"}`;
+      const jwt = await auth.getAuthToken().catch(() => null);
+      app.contentWindow?.postMessage({ type: "replit-user", user, jwt }, APP_ORIGIN);
+    } else {
+      ctx.textContent = "extension";
+    }
+  } catch { ctx.textContent = "extension"; }
+})();
+
+// FS/exec bridge so your iframe can touch the CURRENT Repl when allowed.
+// Your hosted app can still use GitHub PR flow for any repo (recommended).
+window.addEventListener("message", async (ev) => {
+  if (new URL(APP_ORIGIN).origin !== ev.origin) return;
+  const { type, path, content, cmd, reqId } = ev.data || {};
+  try {
+    const { experimental } = ext || {};
+    const { fs, process } = experimental || {};
+    if (type === "fs.read" && fs?.readFile) {
       const buf = await fs.readFile(path);
-      return new TextDecoder().decode(buf);
-    }
-
-    async function writeFile(path, content) {
+      app.contentWindow?.postMessage({ type:"fs.read.ok", reqId, data:new TextDecoder().decode(buf) }, APP_ORIGIN);
+    } else if (type === "fs.write" && fs?.writeFile) {
       await fs.writeFile(path, new TextEncoder().encode(content));
-    }
-
-    async function listDir(path = ".") {
-      const entries = await fs.readdir(path);
-      return entries;
-    }
-
-    async function run(cmd) {
-      const { stdout, stderr, code } = await proc.exec({ 
-        cmd: ["bash", "-lc", cmd] 
-      });
-      return { 
-        stdout: new TextDecoder().decode(stdout || new Uint8Array()),
-        stderr: new TextDecoder().decode(stderr || new Uint8Array()),
-        code 
+      app.contentWindow?.postMessage({ type:"fs.write.ok", reqId }, APP_ORIGIN);
+    } else if (type === "proc.exec" && process?.exec) {
+      const r = await process.exec({ cmd:["bash","-lc",cmd] });
+      const out = {
+        stdout: new TextDecoder().decode(r.stdout||new Uint8Array()),
+        stderr: new TextDecoder().decode(r.stderr||new Uint8Array()),
+        code:   r.code
       };
+      app.contentWindow?.postMessage({ type:"proc.exec.ok", reqId, out }, APP_ORIGIN);
     }
-
-    // Listen for requests from iframe
-    window.addEventListener("message", async (ev) => {
-      if (new URL(APP_ORIGIN).origin !== ev.origin) return;
-      const { type, path, content, cmd, reqId } = ev.data || {};
-      
-      try {
-        switch(type) {
-          case "fs.read":
-            const data = await readFile(path);
-            app.contentWindow?.postMessage({ 
-              type: "fs.read.ok", 
-              reqId, 
-              data 
-            }, APP_ORIGIN);
-            break;
-            
-          case "fs.write":
-            await writeFile(path, content);
-            app.contentWindow?.postMessage({ 
-              type: "fs.write.ok", 
-              reqId 
-            }, APP_ORIGIN);
-            break;
-            
-          case "fs.list":
-            const entries = await listDir(path);
-            app.contentWindow?.postMessage({ 
-              type: "fs.list.ok", 
-              reqId, 
-              entries 
-            }, APP_ORIGIN);
-            break;
-            
-          case "proc.exec":
-            const out = await run(cmd);
-            app.contentWindow?.postMessage({ 
-              type: "proc.exec.ok", 
-              reqId, 
-              out 
-            }, APP_ORIGIN);
-            break;
-        }
-      } catch (e) {
-        app.contentWindow?.postMessage({ 
-          type: `${type}.err`, 
-          reqId, 
-          error: String(e) 
-        }, APP_ORIGIN);
-      }
-    });
-    
-    // Notify iframe that FS bridge is ready
-    setTimeout(() => {
-      app.contentWindow?.postMessage({ 
-        type: "replit-extension-ready", 
-        capabilities: {
-          fs: true,
-          proc: true,
-          auth: !!auth
-        }
-      }, APP_ORIGIN);
-    }, 1000);
-  } else {
-    // No FS access - still notify iframe
-    setTimeout(() => {
-      app.contentWindow?.postMessage({ 
-        type: "replit-extension-ready", 
-        capabilities: {
-          fs: false,
-          proc: false,
-          auth: false
-        }
-      }, APP_ORIGIN);
-    }, 1000);
+  } catch (e) {
+    app.contentWindow?.postMessage({ type: `${ev.data?.type}.err`, reqId, error: String(e) }, APP_ORIGIN);
   }
-}).catch(() => {
-  console.log("[Vecto] Running without Replit APIs");
-  statusEl.textContent = "● GPT-5 Ready";
+});
+
+// Tell your app it's embedded
+app.addEventListener("load", () => {
+  app.contentWindow?.postMessage({ type:"replit-extension-context", payload:{ isExtension:true } }, APP_ORIGIN);
 });

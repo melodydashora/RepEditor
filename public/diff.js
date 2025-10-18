@@ -1,12 +1,12 @@
-import { experimental } from "@replit/extensions";
-const { fs } = experimental ?? {};
+// diff.js
+let ext=null; try{ext=await import("@replit/extensions")}catch{}
+const { experimental } = ext || {}; const { fs } = experimental || {};
 const out = document.getElementById("out");
 
-async function openPathFromQuery() {
-  const u = new URL(location.href);
-  const p = u.searchParams.get("path");
-  if (!p || !fs?.readFile) return;
-  const buf = await fs.readFile(p);
+async function loadByQuery(){
+  const path = new URL(location.href).searchParams.get("path");
+  if (!path || !fs?.readFile) return;
+  const buf = await fs.readFile(path);
   out.value = new TextDecoder().decode(buf);
 }
-openPathFromQuery();
+loadByQuery();
