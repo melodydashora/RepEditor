@@ -1,7 +1,7 @@
-# AI Assistant Builder
+# RepEditor - AI-Powered Repository Editor
 
 ## Overview
-A unified AI Assistant Builder platform that enables users to create custom AI assistants with:
+RepEditor is a unified AI Assistant Builder platform that enables users to create custom AI assistants with:
 - Full repository access and code editing capabilities
 - Dynamic provider/model selection across OpenAI, Anthropic, and Gemini
 - GitHub OAuth authentication and repository management
@@ -83,6 +83,10 @@ Required secrets:
 - Enhanced settings modal with dual repository support (GitHub + Replit)
 - Added disabled state for dropdowns until authentication succeeds
 - Implemented proper app/repo listing after authentication
+
+## Repository
+- **GitHub**: git@github.com:melodydashora/RepEditor.git
+- **Project Name**: RepEditor (AI-Powered Repository Editor)
 
 ## User Preferences
 - Focus on building the best AI assistant framework
