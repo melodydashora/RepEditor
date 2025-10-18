@@ -73,6 +73,27 @@ Required secrets:
 
 ## Recent Updates
 
+### October 18, 2025 - Late Evening
+- **AI Autofix System**: 6 endpoints for GPT-5 planning + Codex diff generation + auto PR creation
+  - `/api/ai/plan` - GPT-5 analyzes repo and creates fix plan
+  - `/api/ai/diff` - Codex generates unified diff patches  
+  - `/api/ai/apply` - Auto-commits, pushes branch, and opens PR
+  - `/api/ai/autofix` - One-click: plan → diff → apply → PR
+  - `/api/ai/tree` - Browse GitHub repo file tree
+  - `/api/ai/file` - Read file contents from GitHub repos
+- **SSH Access System**: 7 endpoints for direct Replit app remote access
+  - `/api/ssh/keygen` - Generate SSH keypairs for Replit authentication
+  - `/api/ssh/keys` - List stored SSH keys
+  - `/api/ssh/connect` - Get SSH connection details for any Repl
+  - `/api/ssh/exec` - Execute commands on remote Repls
+  - `/api/ssh/repls` - List available Replit apps
+  - `/api/ssh/browse` - Browse files in remote Repls
+  - `/api/ssh/read` - Read file contents from remote Repls
+- **GPT Frame Integration**: Added 🤖 GPT button to main interface header
+  - Opens dedicated GPT chat frame with full repository access
+  - Direct access to file operations, git commands, shell execution
+  - Available at `/api/chat/frame` endpoint
+
 ### October 18, 2025 - Evening
 - **Redesigned Configuration UI**: Converted modal popup to full-page configuration screen
 - **Improved UX Flow**: Click ⚙️ → Configure → Save Changes → Returns to chat with file tree loaded
