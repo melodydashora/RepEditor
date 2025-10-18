@@ -29,8 +29,16 @@ outputType = "webview"
 packages = ["c-ares", "cargo", "fontconfig", "ghostscript", "glib", "grpc", "harfbuzz", "jiq", "jq", "jq-lsp", "jql", "libiconv", "libxcrypt", "lsof", "nodejs-18", "nodejs-20", "nodejs-22", "openssl", "pandoc", "pango", "pkg-config", "postgresql", "python312Packages.jq", "python312Packages.xstatic-jquery-ui", "python313Packages.django-jquery-js", "python313Packages.jq", "python313Packages.xstatic-jquery", "rustc", "tree", "undollar", "wkhtmltopdf", "zlib"]
 channel = "stable-25_05"
 
+
+
 [agent]
 expertMode = true
+
+# Extension settings to define and manage a workspace extension
+
+[extension]
+isExtension = true
+extensionID = "repeditor-gpt-access"
 
 [[ports]]
 localPort = 3101
