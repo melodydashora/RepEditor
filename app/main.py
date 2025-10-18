@@ -15,7 +15,7 @@ import uvicorn
 
 from app.core.config import settings, engine
 from app.models.database import Base
-from app.routes import strategy, mlops, chat, files
+from app.routes import strategy, mlops, chat, files, health
 
 
 # Lifespan context manager for startup/shutdown
@@ -194,9 +194,11 @@ async def kubernetes_readiness():
 
 @app.get("/api/diagnostics")
 async def diagnostics():
-    """System diagnostics endpoint"""
+    """System diagnostics endpoint with topology validation"""
     return {
         "ok": True,
+        "role": "gateway",
+        "version": "5.0.0",
         "system": {
             "port": settings.PORT,
             "host": settings.HOST,
@@ -204,10 +206,43 @@ async def diagnostics():
             "is_production": settings.is_production,
             "is_replit": settings.is_replit,
         },
+        "ports": {
+            "gateway": {
+                "port": settings.PORT,
+                "host": settings.HOST,
+                "public": True
+            },
+            "sdk": {
+                "port": 3101,
+                "host": "127.0.0.1",
+                "public": False,
+                "note": "Internal only - handles AI assistant"
+            },
+            "agent": {
+                "port": 3102,
+                "host": "127.0.0.1",
+                "public": False,
+                "note": "Internal only - handles workspace intelligence"
+            }
+        },
+        "topology": {
+            "gateway_host": settings.HOST,
+            "sdk_host": "127.0.0.1",
+            "agent_host": "127.0.0.1",
+            "external_only_gateway": True,
+            "note": "Only Gateway (port 5000) should be externally reachable"
+        },
         "ai_models": {
-            "strategist": settings.STRATEGIST_MODEL,
-            "planner": settings.PLANNER_MODEL,
-            "validator": settings.VALIDATOR_MODEL,
+            "assistant": {
+                "model": "gpt-5",
+                "provider": "openai",
+                "endpoint": "/api/chat"
+            },
+            "triad": {
+                "strategist": settings.STRATEGIST_MODEL,
+                "planner": settings.PLANNER_MODEL,
+                "validator": settings.VALIDATOR_MODEL,
+            }
         },
         "integrations": {
             "anthropic": bool(settings.ANTHROPIC_API_KEY),
