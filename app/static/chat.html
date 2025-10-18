@@ -436,62 +436,68 @@
         <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 700px;">
             <div class="modal-header">
                 <span style="font-size: 1.5em;">⚙️</span>
-                <h2>Repository Settings</h2>
+                <h2>Repository Configuration</h2>
             </div>
             <div class="modal-body">
+                <p style="color: #94a3b8; margin-bottom: 20px; font-size: 0.9em;">
+                    Connect to GitHub or Replit to give the AI assistant access to your repository files.
+                </p>
+
                 <!-- GitHub Section -->
-                <div style="margin-bottom: 30px; padding-bottom: 30px; border-bottom: 2px solid #334155;">
+                <div style="margin-bottom: 30px; padding: 20px; background: rgba(102, 126, 234, 0.1); border-radius: 8px; border: 1px solid rgba(102, 126, 234, 0.3);">
                     <h3 style="color: #667eea; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
                         </svg>
-                        GitHub
+                        GitHub Repository
                     </h3>
+                    
                     <div class="form-group">
-                        <label for="githubUsername">GitHub Username</label>
-                        <input type="text" id="githubUsername" placeholder="Enter your GitHub username">
+                        <label for="githubUsername">Username</label>
+                        <input type="text" id="githubUsername" placeholder="your-github-username">
                     </div>
                     <div class="form-group">
-                        <label for="githubToken">GitHub Personal Access Token</label>
-                        <input type="password" id="githubToken" placeholder="ghp_... (with repo scope)">
+                        <label for="githubToken">Personal Access Token</label>
+                        <input type="password" id="githubToken" placeholder="ghp_xxxxxxxxxxxxx">
                         <small style="color: #94a3b8; font-size: 0.85em; display: block; margin-top: 4px;">
-                            Create at: github.com/settings/tokens (needs 'repo' scope)
+                            📝 Create at: <a href="https://github.com/settings/tokens/new" target="_blank" style="color: #667eea;">github.com/settings/tokens</a> (needs 'repo' scope)
                         </small>
                     </div>
+                    <button onclick="authenticateGithub()" id="githubAuthButton" class="btn-connect" style="width: 100%; margin-bottom: 15px;">
+                        🔐 Authenticate GitHub
+                    </button>
                     <div class="form-group">
-                        <label for="githubRepo">GitHub Repository</label>
+                        <label for="githubRepo">Select Repository</label>
                         <select id="githubRepo" disabled style="opacity: 0.5; cursor: not-allowed;">
                             <option value="">Authenticate first to load repos</option>
                         </select>
                     </div>
-                    <button onclick="authenticateGithub()" id="githubAuthButton" class="btn-connect" style="width: 100%; margin-bottom: 10px;">
-                        Authenticate GitHub
-                    </button>
                 </div>
 
                 <!-- Replit Section -->
-                <div>
+                <div style="padding: 20px; background: rgba(102, 126, 234, 0.1); border-radius: 8px; border: 1px solid rgba(102, 126, 234, 0.3);">
                     <h3 style="color: #667eea; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
                         <span style="font-size: 1.2em;">🔄</span>
-                        Replit
+                        Replit Application
                     </h3>
+                    
                     <div class="form-group">
-                        <label for="replitUsername">Replit Username</label>
-                        <input type="text" id="replitUsername" placeholder="Enter your Replit username">
+                        <label for="replitUsername">Username</label>
+                        <input type="text" id="replitUsername" placeholder="your-replit-username">
                     </div>
                     <div class="form-group">
-                        <label for="replitPassword">Replit Password</label>
-                        <input type="password" id="replitPassword" placeholder="Enter your Replit password">
+                        <label for="replitPassword">Password</label>
+                        <input type="password" id="replitPassword" placeholder="••••••••">
                     </div>
+                    <button onclick="authenticateReplit()" id="replitAuthButton" class="btn-connect" style="width: 100%; margin-bottom: 15px;">
+                        🔐 Authenticate Replit
+                    </button>
                     <div class="form-group">
-                        <label for="replitApp">Replit App</label>
+                        <label for="replitApp">Select Application</label>
                         <select id="replitApp" disabled style="opacity: 0.5; cursor: not-allowed;">
                             <option value="">Authenticate first to load apps</option>
                         </select>
                     </div>
-                    <button onclick="authenticateReplit()" id="replitAuthButton" class="btn-connect" style="width: 100%;">
-                        Authenticate Replit
-                    </button>
                 </div>
             </div>
             <div class="modal-footer">
@@ -732,16 +738,118 @@
             return div.innerHTML;
         }
 
-        // Load file tree
+        // Load file tree from selected repository
         async function loadFileTree() {
+            const fileTreeDiv = document.getElementById('fileTree');
+            fileTreeDiv.innerHTML = '<div style="color: #64748b; font-style: italic;">Loading file tree...</div>';
+            
             try {
-                const response = await fetch('/api/files/tree');
-                const tree = await response.json();
-                const fileTreeDiv = document.getElementById('fileTree');
-                fileTreeDiv.innerHTML = renderTree(tree);
+                // Check if we have a selected GitHub repo or Replit app
+                const githubRepo = localStorage.getItem('githubRepo');
+                const githubRepoPath = localStorage.getItem('githubRepoPath');
+                const githubToken = localStorage.getItem('githubSessionToken');
+                
+                if (githubRepo && githubToken) {
+                    // Load GitHub repository file tree
+                    await loadGithubFileTree(githubRepo, githubRepoPath, githubToken);
+                } else {
+                    // Load local file tree (fallback)
+                    const response = await fetch('/api/files/tree');
+                    const tree = await response.json();
+                    fileTreeDiv.innerHTML = renderTree(tree);
+                }
             } catch (error) {
                 console.error('Error loading file tree:', error);
+                fileTreeDiv.innerHTML = '<div style="color: #ef4444;">Error loading file tree</div>';
             }
+        }
+
+        // Load GitHub repository file tree
+        async function loadGithubFileTree(repoFullName, repoPath, sessionToken) {
+            const fileTreeDiv = document.getElementById('fileTree');
+            
+            try {
+                // First, ensure the repo is cloned
+                const cloneResponse = await fetch('/api/repos/select', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${sessionToken}`
+                    },
+                    body: JSON.stringify({
+                        full_name: repoFullName,
+                        branch: null  // Use default branch
+                    })
+                });
+
+                const cloneData = await cloneResponse.json();
+                
+                if (!cloneResponse.ok) {
+                    throw new Error(cloneData.detail || 'Failed to clone repository');
+                }
+
+                const localRepoPath = cloneData.path;
+                localStorage.setItem('githubRepoPath', localRepoPath);
+                
+                // Now fetch the file tree
+                const treeResponse = await fetch(`/api/repos/tree?repo_path=${encodeURIComponent(localRepoPath)}`, {
+                    headers: { 
+                        'Authorization': `Bearer ${sessionToken}`
+                    }
+                });
+
+                const treeData = await treeResponse.json();
+                
+                if (!treeResponse.ok) {
+                    throw new Error('Failed to fetch file tree');
+                }
+                
+                // Convert API response to tree format
+                const tree = convertApiTreeToLocal(treeData.items);
+                fileTreeDiv.innerHTML = `
+                    <div style="color: #10b981; margin-bottom: 10px; padding: 8px; background: rgba(16, 185, 129, 0.1); border-radius: 4px; font-size: 0.85em;">
+                        📦 ${repoFullName}
+                    </div>
+                    ${renderTree(tree)}
+                `;
+            } catch (error) {
+                console.error('Error loading GitHub file tree:', error);
+                fileTreeDiv.innerHTML = `<div style="color: #ef4444;">Error: ${error.message}</div>`;
+            }
+        }
+
+        // Convert API tree format to local tree format
+        function convertApiTreeToLocal(items) {
+            const tree = [];
+            const pathMap = {};
+            
+            // Group items by directory
+            items.forEach(item => {
+                const parts = item.path.split('/');
+                const name = parts[parts.length - 1];
+                const parentPath = parts.slice(0, -1).join('/');
+                
+                const node = {
+                    name: name,
+                    path: item.path,
+                    type: item.kind,
+                    children: []
+                };
+                
+                pathMap[item.path] = node;
+                
+                if (parentPath === '') {
+                    // Root level item
+                    tree.push(node);
+                } else {
+                    // Child item
+                    if (pathMap[parentPath]) {
+                        pathMap[parentPath].children.push(node);
+                    }
+                }
+            });
+            
+            return tree;
         }
 
         function renderTree(items, level = 0, parentId = '') {
@@ -976,7 +1084,7 @@
             }
         }
 
-        function saveSettings() {
+        async function saveSettings() {
             const githubUsername = document.getElementById('githubUsername').value.trim();
             const githubRepo = document.getElementById('githubRepo').value;
             const replitUsername = document.getElementById('replitUsername').value.trim();
@@ -989,15 +1097,18 @@
             }
             
             let savedServices = [];
+            let activeRepo = null;
             
             // Save GitHub settings
             if (githubUsername && githubRepo) {
                 localStorage.setItem('githubUsername', githubUsername);
                 localStorage.setItem('githubRepo', githubRepo);
+                localStorage.setItem('activeRepository', 'github');
                 savedServices.push(`GitHub: ${githubRepo}`);
+                activeRepo = 'github';
             }
             
-            // Save Replit settings
+            // Save Replit settings (Replit takes precedence if both are selected)
             if (replitUsername && replitApp) {
                 const appSelect = document.getElementById('replitApp');
                 const selectedOption = appSelect.options[appSelect.selectedIndex];
@@ -1006,11 +1117,17 @@
                 localStorage.setItem('replitUsername', replitUsername);
                 localStorage.setItem('replitApp', replitApp);
                 localStorage.setItem('replitAppName', appName);
+                localStorage.setItem('activeRepository', 'replit');
                 savedServices.push(`Replit: ${appName}`);
+                activeRepo = 'replit';
             }
             
-            alert(`Settings saved!\n\nWorking on:\n${savedServices.join('\n')}`);
             closeSettings();
+            
+            // Refresh file tree to show the selected repository
+            alert(`Settings saved! Loading repository files...\n\nWorking on:\n${savedServices.join('\n')}`);
+            
+            await loadFileTree();
         }
 
         // Load saved settings on page load
