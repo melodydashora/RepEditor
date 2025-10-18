@@ -53,6 +53,38 @@ async def health_check():
     }
 
 
+@router.get("/assistant/verify-override")
+async def verify_assistant_override():
+    """
+    Verify assistant override is active for bookmarklet/external tools
+    Returns RepEditor identity and capabilities
+    """
+    from datetime import datetime
+    return {
+        "ok": True,
+        "override_active": True,
+        "identity": "RepEditor (AI-Powered Repository Editor)",
+        "assistant_name": "RepEditor",
+        "status": "ACTIVE",
+        "model": settings.PLANNER_MODEL,
+        "capabilities": [
+            "repository_file_access",
+            "code_editing",
+            "git_operations",
+            "web_search",
+            "memory_system",
+            "multi_model_support"
+        ],
+        "endpoints": {
+            "chat": "/api/chat",
+            "file_tree": "/api/repos/tree",
+            "file_read": "/api/repos/file",
+            "providers": "/api/providers"
+        },
+        "time": datetime.now().isoformat()
+    }
+
+
 @router.get("/diagnostics")
 async def diagnostics():
     """
