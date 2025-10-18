@@ -277,6 +277,7 @@ app.mount("/static", StaticFiles(directory="app/static"), name="static")
 app.include_router(strategy.router)
 app.include_router(mlops.router)
 app.include_router(chat.router)
+app.include_router(chat.providers_router)  # Provider models endpoint
 app.include_router(files.router)
 
 

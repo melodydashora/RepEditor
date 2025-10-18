@@ -746,3 +746,68 @@ Act directly. Use tools, don't describe using them."""
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Chat error: {str(e)}")
+
+
+# Provider models endpoint (separate router without prefix)
+from fastapi import APIRouter as BaseRouter
+providers_router = BaseRouter(prefix="/api/providers", tags=["providers"])
+
+
+@providers_router.get("/{provider}/models")
+async def get_provider_models(provider: str):
+    """
+    Fetch available models from AI provider
+    
+    Supported providers: openai, anthropic, gemini
+    """
+    try:
+        if provider == "openai":
+            # Fetch OpenAI models using API key
+            client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
+            models_response = await client.models.list()
+            
+            # Filter to chat models only and format response
+            chat_models = [
+                {
+                    "id": model.id,
+                    "name": model.id,
+                    "created": model.created
+                }
+                for model in models_response.data
+                if any(prefix in model.id for prefix in ["gpt-", "o1-", "o3-", "chatgpt"])
+            ]
+            
+            # Sort by most recent first
+            chat_models.sort(key=lambda x: x.get("created", 0), reverse=True)
+            
+            return {"provider": "openai", "models": chat_models}
+            
+        elif provider == "anthropic":
+            # Static list of Anthropic models (API doesn't provide model list endpoint)
+            return {
+                "provider": "anthropic",
+                "models": [
+                    {"id": "claude-sonnet-4.5-20250929", "name": "Claude Sonnet 4.5"},
+                    {"id": "claude-opus-4.1", "name": "Claude Opus 4.1"},
+                    {"id": "claude-3-5-sonnet-20241022", "name": "Claude 3.5 Sonnet"},
+                    {"id": "claude-3-opus-20240229", "name": "Claude 3 Opus"}
+                ]
+            }
+            
+        elif provider == "gemini":
+            # Static list of Gemini models
+            return {
+                "provider": "gemini",
+                "models": [
+                    {"id": "gemini-2.5-pro-latest", "name": "Gemini 2.5 Pro"},
+                    {"id": "gemini-2.5-flash-latest", "name": "Gemini 2.5 Flash"},
+                    {"id": "gemini-1.5-pro", "name": "Gemini 1.5 Pro"},
+                    {"id": "gemini-1.5-flash", "name": "Gemini 1.5 Flash"}
+                ]
+            }
+            
+        else:
+            raise HTTPException(status_code=400, detail=f"Unsupported provider: {provider}")
+            
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching models: {str(e)}")
