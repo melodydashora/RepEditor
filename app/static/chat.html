@@ -1029,7 +1029,7 @@
 
                 const reposData = await reposResponse.json();
                 
-                if (reposResponse.ok && reposData.repositories) {
+                if (reposResponse.ok && reposData.repos) {
                     // Successfully authenticated and fetched repos
                     authButton.textContent = '✓ Authenticated';
                     authButton.style.background = '#10b981';
@@ -1040,7 +1040,7 @@
                     repoSelect.style.cursor = 'pointer';
                     repoSelect.innerHTML = '<option value="">Select repository to work on</option>';
                     
-                    reposData.repositories.forEach(repo => {
+                    reposData.repos.forEach(repo => {
                         const option = document.createElement('option');
                         option.value = repo.full_name;
                         option.textContent = repo.full_name + (repo.private ? ' 🔒' : '');
@@ -1050,7 +1050,7 @@
                         repoSelect.appendChild(option);
                     });
                     
-                    alert(`Successfully authenticated! Found ${reposData.repositories.length} repositories.`);
+                    alert(`Successfully authenticated! Found ${reposData.repos.length} repositories.`);
                 } else {
                     throw new Error('Failed to fetch repositories');
                 }
