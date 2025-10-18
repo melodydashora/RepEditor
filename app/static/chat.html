@@ -376,11 +376,17 @@
                 if (currentModel.startsWith('o1-') || currentModel.startsWith('o3-')) {
                     paramOptions = ['max_completion_tokens'];
                 }
-                // GPT-5 models (NOT codex/audio/realtime/image)
+                // GPT-5 models (NOT codex/audio/realtime/image/search)
                 else if (currentModel.startsWith('gpt-5') && !currentModel.includes('codex') && 
                          !currentModel.includes('audio') && !currentModel.includes('realtime') && 
                          !currentModel.includes('image') && !currentModel.includes('search')) {
                     paramOptions = ['reasoning_effort', 'verbosity', 'max_completion_tokens'];
+                }
+                // Specialized models (codex, audio, etc.) - NO parameters supported
+                else if (currentModel.includes('codex') || currentModel.includes('audio') ||
+                         currentModel.includes('realtime') || currentModel.includes('image') ||
+                         currentModel.includes('search')) {
+                    paramOptions = []; // No parameters
                 }
                 // GPT-4o/4.1 models
                 else if (currentModel.startsWith('gpt-4o') || currentModel.startsWith('gpt-4.1')) {

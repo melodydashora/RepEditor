@@ -731,29 +731,25 @@ Act directly. Use tools, don't describe using them."""
                     response.raise_for_status()
                     
                     # Parse JSON response
-                    try:
-                        data = response.json()
-                        
-                        # If data is a string that looks like a Python list, parse it
-                        if isinstance(data, str) and data.startswith('['):
-                            try:
-                                data = ast.literal_eval(data)
-                            except Exception:
-                                pass  # Keep as string if parsing fails
-                    except Exception:
-                        # If JSON fails, return raw text
-                        return ChatResponse(
-                            response=response.text,
-                            tool_calls=None
-                        )
+                    response_text = response.text
                     
-                    # Extract response text from /v1/responses format
-                    # Codex returns: [{'type': 'reasoning', ...}, {'type': 'message', 'content': [{'text': '...'}]}]
+                    # Try parsing as JSON first
+                    try:
+                        data = json.loads(response_text)
+                    except json.JSONDecodeError:
+                        # If JSON fails, try Python literal (single quotes)
+                        try:
+                            data = ast.literal_eval(response_text)
+                        except Exception:
+                            # If both fail, return raw text
+                            return ChatResponse(response=response_text, tool_calls=None)
+                    
+                    # Extract text from codex response format
+                    # Format: [{'type': 'reasoning', ...}, {'type': 'message', 'content': [{'type': 'output_text', 'text': '...'}]}]
                     output_text = None
                     
-                    # Handle response array format
                     if isinstance(data, list):
-                        # Find the message object in the response array
+                        # Find the message item
                         for item in data:
                             if isinstance(item, dict) and item.get("type") == "message":
                                 content_list = item.get("content", [])
@@ -764,22 +760,15 @@ Act directly. Use tools, don't describe using them."""
                                             break
                                 if output_text:
                                     break
-                    
-                    # Handle single object response format
                     elif isinstance(data, dict):
-                        # Try common response fields
-                        output_text = (
-                            data.get("output") or 
-                            data.get("text") or 
-                            data.get("response") or
-                            data.get("content")
-                        )
+                        # Single object format
+                        output_text = data.get("output") or data.get("text") or data.get("response")
                     
-                    # Fallback: stringify the whole response
+                    # If we still don't have text, show formatted JSON
                     if not output_text:
                         output_text = json.dumps(data, indent=2)
                     
-                    # Final safety: ensure it's a string
+                    # Ensure string output
                     if not isinstance(output_text, str):
                         output_text = str(output_text)
                     
