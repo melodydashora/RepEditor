@@ -937,11 +937,19 @@
                     })
                 });
 
-                const cloneData = await cloneResponse.json();
-                
                 if (!cloneResponse.ok) {
-                    throw new Error(cloneData.detail || 'Failed to clone repository');
+                    // Try to get error detail from JSON, fallback to status text
+                    let errorMessage = 'Failed to clone repository';
+                    try {
+                        const errorData = await cloneResponse.json();
+                        errorMessage = errorData.detail || errorMessage;
+                    } catch {
+                        errorMessage = `${errorMessage} (${cloneResponse.status} ${cloneResponse.statusText})`;
+                    }
+                    throw new Error(errorMessage);
                 }
+                
+                const cloneData = await cloneResponse.json();
 
                 const localRepoPath = cloneData.path;
                 localStorage.setItem('githubRepoPath', localRepoPath);
