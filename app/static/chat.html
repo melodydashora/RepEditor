@@ -525,25 +525,27 @@
                     <!-- Replit Section -->
                     <div style="padding: 20px; background: rgba(102, 126, 234, 0.1); border-radius: 8px; border: 1px solid rgba(102, 126, 234, 0.3);">
                         <h3 style="color: #667eea; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; font-size: 1.2em;">
-                            🔄 Replit Application
+                            🔄 Current Workspace
                         </h3>
                     
-                    <div style="margin-bottom: 15px;">
-                        <label style="display: block; margin-bottom: 6px; color: #e2e8f0; font-weight: 600;">Username</label>
-                        <input type="text" id="replitUsername2" placeholder="your-replit-username" style="width: 100%; padding: 12px; background: #0f172a; border: 2px solid #334155; border-radius: 6px; color: #e2e8f0; font-size: 1em; outline: none;" onfocus="this.style.borderColor='#667eea'" onblur="this.style.borderColor='#334155'">
+                    <div style="margin-bottom: 15px; padding: 15px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 6px;">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                            <span style="font-size: 1.5em;">✅</span>
+                            <div>
+                                <div style="font-weight: 600; color: #10b981;">Ready to Use</div>
+                                <div style="font-size: 0.85em; color: #94a3b8; margin-top: 4px;">No authentication needed</div>
+                            </div>
+                        </div>
                     </div>
-                    <div style="margin-bottom: 15px;">
-                        <label style="display: block; margin-bottom: 6px; color: #e2e8f0; font-weight: 600;">Password</label>
-                        <input type="password" id="replitPassword2" placeholder="••••••••" style="width: 100%; padding: 12px; background: #0f172a; border: 2px solid #334155; border-radius: 6px; color: #e2e8f0; font-size: 1em; outline: none;" onfocus="this.style.borderColor='#667eea'" onblur="this.style.borderColor='#334155'">
-                    </div>
-                    <button onclick="authenticateReplit2()" id="replitAuthButton2" style="width: 100%; padding: 14px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; border-radius: 8px; font-size: 1em; font-weight: 600; cursor: pointer; margin-bottom: 15px;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
-                        🔐 Authenticate Replit
-                    </button>
+
                     <div style="margin-bottom: 0;">
-                        <label style="display: block; margin-bottom: 6px; color: #e2e8f0; font-weight: 600;">Select Application</label>
-                        <select id="replitApp2" disabled style="width: 100%; padding: 12px; background: #0f172a; border: 2px solid #334155; border-radius: 6px; color: #e2e8f0; font-size: 1em; opacity: 0.5; cursor: not-allowed;">
-                            <option value="">Authenticate first to load apps</option>
+                        <label style="display: block; margin-bottom: 6px; color: #e2e8f0; font-weight: 600;">Select Repository</label>
+                        <select id="replitApp2" style="width: 100%; padding: 12px; background: #0f172a; border: 2px solid #334155; border-radius: 6px; color: #e2e8f0; font-size: 1em;">
+                            <option value="/home/runner/workspace">📁 Current Workspace (/home/runner/workspace)</option>
                         </select>
+                        <small style="color: #94a3b8; font-size: 0.85em; display: block; margin-top: 6px;">
+                            💡 This is your current Replit project directory
+                        </small>
                     </div>
                 </div>
                 </div>
