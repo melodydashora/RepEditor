@@ -9,7 +9,10 @@ from pathlib import Path
 import os
 
 from app.routes.auth import get_current_user
-from app.models.auth import AuthSession
+from app.models.auth import AuthSession, User
+from app.core.config import get_db
+from sqlalchemy.orm import Session
+from datetime import datetime
 
 router = APIRouter(prefix="/api/repos", tags=["repositories"])
 
@@ -68,7 +71,8 @@ class GitPushRequest(BaseModel):
 @router.post("/select")
 async def select_repo(
     request: SelectRepoRequest,
-    session: AuthSession = Depends(get_current_user)
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
 ):
     """
     Select and clone a GitHub repository to local workspace
@@ -78,8 +82,14 @@ async def select_repo(
     - Sets up git remote with OAuth token
     - Checks out specified branch
     """
-    if not session.github_token:
-        raise HTTPException(status_code=401, detail="GitHub token required")
+    # Get the user's session with GitHub token
+    session = db.query(AuthSession).filter(
+        AuthSession.user_id == user.id,
+        AuthSession.expires_at > datetime.utcnow()
+    ).order_by(AuthSession.created_at.desc()).first()
+    
+    if not session or not session.github_token:
+        raise HTTPException(status_code=401, detail="GitHub token required. Please authenticate via GitHub.")
     
     # Parse owner/repo
     parts = request.full_name.split("/", 1)
