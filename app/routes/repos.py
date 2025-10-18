@@ -79,6 +79,7 @@ async def select_repo(
     - Fetches latest if already cloned
     - Sets up git remote with OAuth token
     - Checks out specified branch
+    - Special case: if selecting the current repo, return workspace root
     """
     import logging
     logger = logging.getLogger("uvicorn.error")
@@ -96,6 +97,29 @@ async def select_repo(
         raise HTTPException(status_code=400, detail="Invalid repo format (use owner/repo)")
     
     owner, repo = parts
+    
+    # Check if this is the current repository (avoid cloning into itself)
+    current_remote = subprocess.run(
+        ["git", "remote", "get-url", "origin"],
+        cwd=str(BASE_DIR),
+        capture_output=True,
+        text=True,
+        timeout=5
+    )
+    if current_remote.returncode == 0:
+        current_repo = current_remote.stdout.strip()
+        if f"github.com/{owner}/{repo}" in current_repo or f"github.com:{owner}/{repo}" in current_repo:
+            # This IS the current repo - return workspace root
+            logger.error(f"[REPO SELECT] Detected current repo, using workspace root")
+            return {
+                "ok": True,
+                "path": str(BASE_DIR),
+                "full_name": request.full_name,
+                "branch": request.branch or "main",
+                "message": f"Using current workspace: {request.full_name}",
+                "is_current_repo": True
+            }
+    
     target = (CLONE_ROOT / owner / repo).resolve()
     target.parent.mkdir(parents=True, exist_ok=True)
     
