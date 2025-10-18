@@ -393,7 +393,8 @@
     </style>
 </head>
 <body>
-    <div class="layout">
+    <!-- Main Chat Page -->
+    <div id="chatPage" class="layout">
         <div class="main-content">
             <div class="header">
                 <div class="header-content">
@@ -414,7 +415,7 @@
                     <select id="paramValueSelect" onchange="onParamValueChange()" style="display: none;">
                         <option value="">Select Value</option>
                     </select>
-                    <button class="settings-btn" onclick="openSettings()" title="Settings">
+                    <button class="settings-btn" onclick="navigateToConfig()" title="Repository Configuration">
                         ⚙️
                     </button>
                 </div>
@@ -468,7 +469,98 @@
         </div>
     </div>
 
-    <div class="modal-overlay" id="settingsModal" onclick="closeModalOnBackdrop(event)">
+    <!-- Configuration Page -->
+    <div id="configPage" style="display: none; background: #0f172a; min-height: 100vh; padding: 40px 20px;">
+        <div style="max-width: 800px; margin: 0 auto;">
+            <!-- Header with Back Button -->
+            <div style="margin-bottom: 30px; display: flex; align-items: center; gap: 20px;">
+                <button onclick="navigateToChat()" style="padding: 12px 20px; background: #334155; border: none; border-radius: 8px; color: white; cursor: pointer; font-size: 1em; display: flex; align-items: center; gap: 8px;">
+                    ← Back to Chat
+                </button>
+                <div>
+                    <h1 style="font-size: 2em; margin: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                        ⚙️ Repository Configuration
+                    </h1>
+                    <p style="color: #94a3b8; margin-top: 8px; font-size: 0.95em;">
+                        Connect to GitHub or Replit to give the AI assistant access to your repository files
+                    </p>
+                </div>
+            </div>
+
+            <!-- Configuration Sections -->
+            <div style="background: #1e293b; border-radius: 12px; padding: 30px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);">
+                
+                <!-- GitHub Section -->
+                <div style="margin-bottom: 30px; padding: 20px; background: rgba(102, 126, 234, 0.1); border-radius: 8px; border: 1px solid rgba(102, 126, 234, 0.3);">
+                    <h3 style="color: #667eea; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; font-size: 1.3em;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                        </svg>
+                        GitHub Repository
+                    </h3>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 6px; color: #e2e8f0; font-weight: 600;">Username</label>
+                        <input type="text" id="githubUsername2" placeholder="your-github-username" style="width: 100%; padding: 12px; background: #0f172a; border: 2px solid #334155; border-radius: 6px; color: #e2e8f0; font-size: 1em; outline: none;" onfocus="this.style.borderColor='#667eea'" onblur="this.style.borderColor='#334155'">
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 6px; color: #e2e8f0; font-weight: 600;">Personal Access Token</label>
+                        <input type="password" id="githubToken2" placeholder="ghp_xxxxxxxxxxxxx" style="width: 100%; padding: 12px; background: #0f172a; border: 2px solid #334155; border-radius: 6px; color: #e2e8f0; font-size: 1em; outline: none;" onfocus="this.style.borderColor='#667eea'" onblur="this.style.borderColor='#334155'">
+                        <small style="color: #94a3b8; font-size: 0.85em; display: block; margin-top: 6px;">
+                            📝 Create at: <a href="https://github.com/settings/tokens/new" target="_blank" style="color: #667eea; text-decoration: none;">github.com/settings/tokens</a> (needs 'repo' scope)
+                        </small>
+                    </div>
+                    <button onclick="authenticateGithub2()" id="githubAuthButton2" style="width: 100%; padding: 14px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; border-radius: 8px; font-size: 1em; font-weight: 600; cursor: pointer; margin-bottom: 15px;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                        🔐 Authenticate GitHub
+                    </button>
+                    <div style="margin-bottom: 0;">
+                        <label style="display: block; margin-bottom: 6px; color: #e2e8f0; font-weight: 600;">Select Repository</label>
+                        <select id="githubRepo2" disabled style="width: 100%; padding: 12px; background: #0f172a; border: 2px solid #334155; border-radius: 6px; color: #e2e8f0; font-size: 1em; opacity: 0.5; cursor: not-allowed;">
+                            <option value="">Authenticate first to load repos</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Replit Section -->
+                <div style="padding: 20px; background: rgba(102, 126, 234, 0.1); border-radius: 8px; border: 1px solid rgba(102, 126, 234, 0.3);">
+                    <h3 style="color: #667eea; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; font-size: 1.3em;">
+                        🔄 Replit Application
+                    </h3>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 6px; color: #e2e8f0; font-weight: 600;">Username</label>
+                        <input type="text" id="replitUsername2" placeholder="your-replit-username" style="width: 100%; padding: 12px; background: #0f172a; border: 2px solid #334155; border-radius: 6px; color: #e2e8f0; font-size: 1em; outline: none;" onfocus="this.style.borderColor='#667eea'" onblur="this.style.borderColor='#334155'">
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 6px; color: #e2e8f0; font-weight: 600;">Password</label>
+                        <input type="password" id="replitPassword2" placeholder="••••••••" style="width: 100%; padding: 12px; background: #0f172a; border: 2px solid #334155; border-radius: 6px; color: #e2e8f0; font-size: 1em; outline: none;" onfocus="this.style.borderColor='#667eea'" onblur="this.style.borderColor='#334155'">
+                    </div>
+                    <button onclick="authenticateReplit2()" id="replitAuthButton2" style="width: 100%; padding: 14px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; border-radius: 8px; font-size: 1em; font-weight: 600; cursor: pointer; margin-bottom: 15px;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                        🔐 Authenticate Replit
+                    </button>
+                    <div style="margin-bottom: 0;">
+                        <label style="display: block; margin-bottom: 6px; color: #e2e8f0; font-weight: 600;">Select Application</label>
+                        <select id="replitApp2" disabled style="width: 100%; padding: 12px; background: #0f172a; border: 2px solid #334155; border-radius: 6px; color: #e2e8f0; font-size: 1em; opacity: 0.5; cursor: not-allowed;">
+                            <option value="">Authenticate first to load apps</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Save Button -->
+                <div style="margin-top: 30px; display: flex; gap: 15px; justify-content: flex-end;">
+                    <button onclick="navigateToChat()" style="padding: 14px 28px; background: #334155; color: white; border: none; border-radius: 8px; font-size: 1em; font-weight: 600; cursor: pointer;" onmouseover="this.style.background='#475569'" onmouseout="this.style.background='#334155'">
+                        Cancel
+                    </button>
+                    <button onclick="saveChangesAndReturn()" style="padding: 14px 28px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-size: 1em; font-weight: 600; cursor: pointer; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(102, 126, 234, 0.5)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.4)'">
+                        💾 Save Changes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Old Modal (Hidden - kept for backward compatibility) -->
+    <div class="modal-overlay" id="settingsModal" onclick="closeModalOnBackdrop(event)" style="display: none !important;">
         <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 700px;">
             <div class="modal-header">
                 <span style="font-size: 1.5em;">⚙️</span>
@@ -980,6 +1072,42 @@
             modal.classList.remove('active');
         }
 
+        // Navigation functions for config page
+        function navigateToConfig() {
+            document.getElementById('chatPage').style.display = 'none';
+            document.getElementById('configPage').style.display = 'block';
+        }
+
+        function navigateToChat() {
+            document.getElementById('chatPage').style.display = 'flex';
+            document.getElementById('configPage').style.display = 'none';
+        }
+
+        async function saveChangesAndReturn() {
+            // Get selected repository info
+            const githubRepo = document.getElementById('githubRepo2').value;
+            const replitApp = document.getElementById('replitApp2').value;
+            
+            if (!githubRepo && !replitApp) {
+                alert('Please select a repository or application before saving.');
+                return;
+            }
+
+            // Navigate back to chat
+            navigateToChat();
+
+            // Load file tree if GitHub repo was selected
+            if (githubRepo) {
+                const sessionToken = localStorage.getItem('githubSessionToken');
+                const repoPath = localStorage.getItem('githubRepoPath');
+                if (sessionToken) {
+                    await loadGithubFileTree(githubRepo, repoPath, sessionToken);
+                }
+            }
+
+            alert('✅ Configuration saved successfully!');
+        }
+
         function closeModalOnBackdrop(event) {
             if (event.target === event.currentTarget) {
                 closeSettings();
@@ -1064,6 +1192,135 @@
                 }, 2000);
                 
                 alert(`GitHub authentication failed: ${error.message}`);
+            }
+        }
+
+        // Config page authentication functions (duplicates with '2' suffix)
+        async function authenticateGithub2() {
+            const username = document.getElementById('githubUsername2').value.trim();
+            const token = document.getElementById('githubToken2').value.trim();
+
+            if (!username || !token) {
+                alert('Please enter both GitHub username and token');
+                return;
+            }
+
+            const authButton = document.getElementById('githubAuthButton2');
+            const repoSelect = document.getElementById('githubRepo2');
+            
+            authButton.textContent = 'Authenticating...';
+            authButton.disabled = true;
+
+            try {
+                const authResponse = await fetch('/api/auth/github/token', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token })
+                });
+
+                const authData = await authResponse.json();
+                
+                if (!authResponse.ok || !authData.session_token) {
+                    throw new Error(authData.detail || 'Authentication failed');
+                }
+
+                const sessionToken = authData.session_token;
+                localStorage.setItem('githubSessionToken', sessionToken);
+                
+                const reposResponse = await fetch('/api/auth/github/repos', {
+                    headers: { 'Authorization': `Bearer ${sessionToken}` }
+                });
+
+                const reposData = await reposResponse.json();
+                
+                if (reposResponse.ok && reposData.repos) {
+                    authButton.textContent = '✓ Authenticated';
+                    authButton.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+                    
+                    repoSelect.disabled = false;
+                    repoSelect.style.opacity = '1';
+                    repoSelect.style.cursor = 'pointer';
+                    repoSelect.innerHTML = '<option value="">Select repository to work on</option>';
+                    
+                    reposData.repos.forEach(repo => {
+                        const option = document.createElement('option');
+                        option.value = repo.full_name;
+                        option.textContent = repo.full_name + (repo.private ? ' 🔒' : '');
+                        if (repo.description) option.title = repo.description;
+                        repoSelect.appendChild(option);
+                    });
+                    
+                    alert(`✅ Successfully authenticated! Found ${reposData.repos.length} repositories.`);
+                } else {
+                    throw new Error('Failed to fetch repositories');
+                }
+            } catch (error) {
+                authButton.textContent = 'Authentication Failed';
+                authButton.disabled = false;
+                authButton.style.background = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
+                setTimeout(() => {
+                    authButton.textContent = '🔐 Authenticate GitHub';
+                    authButton.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+                }, 2000);
+                alert(`❌ GitHub authentication failed: ${error.message}`);
+            }
+        }
+
+        async function authenticateReplit2() {
+            const username = document.getElementById('replitUsername2').value.trim();
+            const password = document.getElementById('replitPassword2').value.trim();
+
+            if (!username || !password) {
+                alert('Please enter both username and password');
+                return;
+            }
+
+            const authButton = document.getElementById('replitAuthButton2');
+            const appSelect = document.getElementById('replitApp2');
+            
+            authButton.textContent = 'Authenticating...';
+            authButton.disabled = true;
+
+            try {
+                const response = await fetch('/api/config/replit/connect', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    authButton.textContent = '✓ Authenticated';
+                    authButton.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+                    
+                    appSelect.disabled = false;
+                    appSelect.style.opacity = '1';
+                    appSelect.style.cursor = 'pointer';
+                    appSelect.innerHTML = '<option value="">Select app to work on</option>';
+                    
+                    if (data.apps && data.apps.length > 0) {
+                        data.apps.forEach(app => {
+                            const option = document.createElement('option');
+                            option.value = app.id || app.slug;
+                            option.textContent = app.name;
+                            appSelect.appendChild(option);
+                        });
+                    }
+                    
+                    alert(`✅ Successfully authenticated! Found ${data.apps?.length || 0} applications.`);
+                } else {
+                    throw new Error(data.message || 'Authentication failed');
+                }
+            } catch (error) {
+                authButton.textContent = 'Authentication Failed';
+                authButton.disabled = false;
+                authButton.style.background = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
+                setTimeout(() => {
+                    authButton.textContent = '🔐 Authenticate Replit';
+                    authButton.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+                }, 2000);
+                alert(`❌ Replit authentication failed: ${error.message}`);
             }
         }
 

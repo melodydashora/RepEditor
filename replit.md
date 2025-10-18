@@ -73,7 +73,14 @@ Required secrets:
 
 ## Recent Updates
 
-### October 18, 2025
+### October 18, 2025 - Evening
+- **Redesigned Configuration UI**: Converted modal popup to full-page configuration screen
+- **Improved UX Flow**: Click ⚙️ → Configure → Save Changes → Returns to chat with file tree loaded
+- **Fixed GitHub Authentication**: Corrected API token format (`token` instead of `Bearer`)
+- **Fixed Repository Loading**: Fixed frontend-backend data mismatch (`repos` vs `repositories`)
+- **Better Visibility**: "Save Changes" button now always visible on configuration page
+
+### October 18, 2025 - Morning
 - Implemented GitHub OAuth authentication with Authlib
 - Added repository cloning and file browsing system
 - Created dual authentication (GitHub + username/password)
