@@ -310,6 +310,11 @@ Phase C - Eidolon Override Assistant (Assistant Interception):
   - Gateway proxies requests, SDK intercepts /assistant/*
   - Key files: agent-server.js, gateway-server.js, index.ts, context-awareness.ts, memory-enhanced.ts
   - Maintains persistent identity, enhanced memory, cross-session awareness
+  - Memory Persistence: JSON-based versioned storage in data/memory/
+    * writeJson(root, name, data) - Versioned writes with timestamp + .latest.json
+    * readJson(root, name) - Read from .latest.json or last versioned file
+    * listMemoryFiles(root) - List all memory JSON files
+    * deleteMemory(root, name) - Clean up memory files by name prefix
 
 CURRENT SYSTEM ARCHITECTURE:
 - Python FastAPI backend + MLOps (Triad: Claude Strategist → GPT-5 Planner → Gemini Validator)
