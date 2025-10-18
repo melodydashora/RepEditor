@@ -80,6 +80,9 @@ Required secrets:
 - Built session management with 30-day expiration
 - Added git operations (commit, push, config)
 - Removed all rideshare-specific content to focus on AI assistant builder
+- Enhanced settings modal with dual repository support (GitHub + Replit)
+- Added disabled state for dropdowns until authentication succeeds
+- Implemented proper app/repo listing after authentication
 
 ## User Preferences
 - Focus on building the best AI assistant framework

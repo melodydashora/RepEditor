@@ -433,29 +433,66 @@
     </div>
 
     <div class="modal-overlay" id="settingsModal" onclick="closeModalOnBackdrop(event)">
-        <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 700px;">
             <div class="modal-header">
                 <span style="font-size: 1.5em;">⚙️</span>
-                <h2>Replit Settings</h2>
+                <h2>Repository Settings</h2>
             </div>
             <div class="modal-body">
-                <div class="form-group">
-                    <label for="replitUsername">Replit Username</label>
-                    <input type="text" id="replitUsername" placeholder="Enter your Replit username">
+                <!-- GitHub Section -->
+                <div style="margin-bottom: 30px; padding-bottom: 30px; border-bottom: 2px solid #334155;">
+                    <h3 style="color: #667eea; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                        </svg>
+                        GitHub
+                    </h3>
+                    <div class="form-group">
+                        <label for="githubUsername">GitHub Username</label>
+                        <input type="text" id="githubUsername" placeholder="Enter your GitHub username">
+                    </div>
+                    <div class="form-group">
+                        <label for="githubToken">GitHub Personal Access Token</label>
+                        <input type="password" id="githubToken" placeholder="ghp_... (with repo scope)">
+                        <small style="color: #94a3b8; font-size: 0.85em; display: block; margin-top: 4px;">
+                            Create at: github.com/settings/tokens (needs 'repo' scope)
+                        </small>
+                    </div>
+                    <div class="form-group">
+                        <label for="githubRepo">GitHub Repository</label>
+                        <select id="githubRepo" disabled style="opacity: 0.5; cursor: not-allowed;">
+                            <option value="">Authenticate first to load repos</option>
+                        </select>
+                    </div>
+                    <button onclick="authenticateGithub()" id="githubAuthButton" class="btn-connect" style="width: 100%; margin-bottom: 10px;">
+                        Authenticate GitHub
+                    </button>
                 </div>
-                <div class="form-group">
-                    <label for="replitPassword">Replit Password</label>
-                    <input type="password" id="replitPassword" placeholder="Enter your Replit password">
+
+                <!-- Replit Section -->
+                <div>
+                    <h3 style="color: #667eea; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 1.2em;">🔄</span>
+                        Replit
+                    </h3>
+                    <div class="form-group">
+                        <label for="replitUsername">Replit Username</label>
+                        <input type="text" id="replitUsername" placeholder="Enter your Replit username">
+                    </div>
+                    <div class="form-group">
+                        <label for="replitPassword">Replit Password</label>
+                        <input type="password" id="replitPassword" placeholder="Enter your Replit password">
+                    </div>
+                    <div class="form-group">
+                        <label for="replitApp">Replit App</label>
+                        <select id="replitApp" disabled style="opacity: 0.5; cursor: not-allowed;">
+                            <option value="">Authenticate first to load apps</option>
+                        </select>
+                    </div>
+                    <button onclick="authenticateReplit()" id="replitAuthButton" class="btn-connect" style="width: 100%;">
+                        Authenticate Replit
+                    </button>
                 </div>
-                <div class="form-group">
-                    <label for="replitApp">Replit App</label>
-                    <select id="replitApp" disabled style="opacity: 0.5; cursor: not-allowed;">
-                        <option value="">Authenticate first to load apps</option>
-                    </select>
-                </div>
-                <button onclick="authenticateReplit()" id="authButton" class="btn-connect" style="width: 100%;">
-                    Authenticate
-                </button>
             </div>
             <div class="modal-footer">
                 <button onclick="closeSettings()" class="btn-secondary">Close</button>
@@ -780,6 +817,87 @@
             }
         }
 
+        async function authenticateGithub() {
+            const username = document.getElementById('githubUsername').value.trim();
+            const token = document.getElementById('githubToken').value.trim();
+
+            if (!username || !token) {
+                alert('Please enter both GitHub username and token');
+                return;
+            }
+
+            const authButton = document.getElementById('githubAuthButton');
+            const repoSelect = document.getElementById('githubRepo');
+            
+            // Show loading state
+            authButton.textContent = 'Authenticating...';
+            authButton.disabled = true;
+
+            try {
+                // Authenticate with token
+                const authResponse = await fetch('/api/auth/github/token', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token })
+                });
+
+                const authData = await authResponse.json();
+                
+                if (!authResponse.ok || !authData.session_token) {
+                    throw new Error(authData.detail || 'Authentication failed');
+                }
+
+                // Store session token
+                const sessionToken = authData.session_token;
+                localStorage.setItem('githubSessionToken', sessionToken);
+                
+                // Fetch repositories
+                const reposResponse = await fetch('/api/auth/github/repos', {
+                    headers: { 
+                        'Authorization': `Bearer ${sessionToken}`
+                    }
+                });
+
+                const reposData = await reposResponse.json();
+                
+                if (reposResponse.ok && reposData.repositories) {
+                    // Successfully authenticated and fetched repos
+                    authButton.textContent = '✓ Authenticated';
+                    authButton.style.background = '#10b981';
+                    
+                    // Enable and populate the repo dropdown
+                    repoSelect.disabled = false;
+                    repoSelect.style.opacity = '1';
+                    repoSelect.style.cursor = 'pointer';
+                    repoSelect.innerHTML = '<option value="">Select repository to work on</option>';
+                    
+                    reposData.repositories.forEach(repo => {
+                        const option = document.createElement('option');
+                        option.value = repo.full_name;
+                        option.textContent = repo.full_name + (repo.private ? ' 🔒' : '');
+                        if (repo.description) {
+                            option.title = repo.description;
+                        }
+                        repoSelect.appendChild(option);
+                    });
+                    
+                    alert(`Successfully authenticated! Found ${reposData.repositories.length} repositories.`);
+                } else {
+                    throw new Error('Failed to fetch repositories');
+                }
+            } catch (error) {
+                authButton.textContent = 'Authentication Failed';
+                authButton.disabled = false;
+                authButton.style.background = '#ef4444';
+                setTimeout(() => {
+                    authButton.textContent = 'Retry Authentication';
+                    authButton.style.background = '';
+                }, 2000);
+                
+                alert(`GitHub authentication failed: ${error.message}`);
+            }
+        }
+
         async function authenticateReplit() {
             const username = document.getElementById('replitUsername').value.trim();
             const password = document.getElementById('replitPassword').value.trim();
@@ -789,7 +907,7 @@
                 return;
             }
 
-            const authButton = document.getElementById('authButton');
+            const authButton = document.getElementById('replitAuthButton');
             const appSelect = document.getElementById('replitApp');
             
             // Show loading state
@@ -859,43 +977,64 @@
         }
 
         function saveSettings() {
-            const username = document.getElementById('replitUsername').value.trim();
-            const app = document.getElementById('replitApp').value;
-            const appSelect = document.getElementById('replitApp');
+            const githubUsername = document.getElementById('githubUsername').value.trim();
+            const githubRepo = document.getElementById('githubRepo').value;
+            const replitUsername = document.getElementById('replitUsername').value.trim();
+            const replitApp = document.getElementById('replitApp').value;
             
-            if (!username) {
-                alert('Please enter a Replit username');
+            // At least one service must be configured
+            if (!githubRepo && !replitApp) {
+                alert('Please select at least one repository (GitHub or Replit)');
                 return;
             }
             
-            if (!app) {
-                alert('Please select a Replit app');
-                return;
+            let savedServices = [];
+            
+            // Save GitHub settings
+            if (githubUsername && githubRepo) {
+                localStorage.setItem('githubUsername', githubUsername);
+                localStorage.setItem('githubRepo', githubRepo);
+                savedServices.push(`GitHub: ${githubRepo}`);
             }
             
-            // Save to localStorage
-            localStorage.setItem('replitUsername', username);
-            localStorage.setItem('replitApp', app);
+            // Save Replit settings
+            if (replitUsername && replitApp) {
+                const appSelect = document.getElementById('replitApp');
+                const selectedOption = appSelect.options[appSelect.selectedIndex];
+                const appName = selectedOption.textContent;
+                
+                localStorage.setItem('replitUsername', replitUsername);
+                localStorage.setItem('replitApp', replitApp);
+                localStorage.setItem('replitAppName', appName);
+                savedServices.push(`Replit: ${appName}`);
+            }
             
-            // Get the app name for display
-            const selectedOption = appSelect.options[appSelect.selectedIndex];
-            const appName = selectedOption.textContent;
-            localStorage.setItem('replitAppName', appName);
-            
-            alert(`Settings saved! Working on: ${appName}`);
+            alert(`Settings saved!\n\nWorking on:\n${savedServices.join('\n')}`);
             closeSettings();
         }
 
         // Load saved settings on page load
         function loadSavedSettings() {
-            const savedUsername = localStorage.getItem('replitUsername');
-            const savedApp = localStorage.getItem('replitApp');
+            // Load GitHub settings
+            const savedGithubUsername = localStorage.getItem('githubUsername');
+            const savedGithubRepo = localStorage.getItem('githubRepo');
             
-            if (savedUsername) {
-                document.getElementById('replitUsername').value = savedUsername;
+            if (savedGithubUsername) {
+                document.getElementById('githubUsername').value = savedGithubUsername;
             }
-            if (savedApp) {
-                document.getElementById('replitApp').value = savedApp;
+            if (savedGithubRepo) {
+                document.getElementById('githubRepo').value = savedGithubRepo;
+            }
+            
+            // Load Replit settings
+            const savedReplitUsername = localStorage.getItem('replitUsername');
+            const savedReplitApp = localStorage.getItem('replitApp');
+            
+            if (savedReplitUsername) {
+                document.getElementById('replitUsername').value = savedReplitUsername;
+            }
+            if (savedReplitApp) {
+                document.getElementById('replitApp').value = savedReplitApp;
             }
         }
 
