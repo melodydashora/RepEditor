@@ -1,0 +1,10 @@
+{
+  "name": "GPT Repository Access",
+  "description": "Direct GPT-5 access with full repository control - read files, edit code, run commands",
+  "tools": [
+    {
+      "handler": "/api/chat/frame",
+      "name": "GPT Access"
+    }
+  ]
+}

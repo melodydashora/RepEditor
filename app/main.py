@@ -272,6 +272,13 @@ async def chat_page():
     return FileResponse("app/static/chat.html")
 
 
+@app.get("/extension.json")
+async def extension_manifest():
+    """Replit Extension manifest for workspace tool"""
+    from fastapi.responses import FileResponse
+    return FileResponse("app/static/extension.json")
+
+
 # ============================================================================
 # API ROUTES
 # ============================================================================
