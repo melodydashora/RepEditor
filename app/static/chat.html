@@ -427,7 +427,11 @@
                 </button>
             </div>
             <div class="file-tree" id="fileTree">
-                <div style="color: #64748b; font-style: italic;">Loading file tree...</div>
+                <div style="color: #94a3b8; font-style: italic; padding: 20px; text-align: center; background: rgba(100, 116, 139, 0.1); border-radius: 8px; border: 1px dashed #334155;">
+                    <div style="font-size: 2em; margin-bottom: 10px;">🔐</div>
+                    <div style="margin-bottom: 10px;">No repository connected</div>
+                    <div style="font-size: 0.85em; opacity: 0.8;">Click the ⚙️ gear icon to authenticate and select a repository</div>
+                </div>
             </div>
         </div>
     </div>
@@ -741,26 +745,51 @@
         // Load file tree from selected repository
         async function loadFileTree() {
             const fileTreeDiv = document.getElementById('fileTree');
-            fileTreeDiv.innerHTML = '<div style="color: #64748b; font-style: italic;">Loading file tree...</div>';
+            
+            // Check if we have a selected GitHub repo or Replit app
+            const githubRepo = localStorage.getItem('githubRepo');
+            const githubRepoPath = localStorage.getItem('githubRepoPath');
+            const githubToken = localStorage.getItem('githubSessionToken');
+            const replitApp = localStorage.getItem('replitApp');
+            
+            // Show "not connected" message if no repo is selected
+            if (!githubRepo && !replitApp) {
+                fileTreeDiv.innerHTML = `
+                    <div style="color: #94a3b8; font-style: italic; padding: 20px; text-align: center; background: rgba(100, 116, 139, 0.1); border-radius: 8px; border: 1px dashed #334155;">
+                        <div style="font-size: 2em; margin-bottom: 10px;">🔐</div>
+                        <div style="margin-bottom: 10px;">No repository connected</div>
+                        <div style="font-size: 0.85em; opacity: 0.8;">Click the ⚙️ gear icon to authenticate and select a repository</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            fileTreeDiv.innerHTML = '<div style="color: #64748b; font-style: italic; padding: 20px; text-align: center;">Loading file tree...</div>';
             
             try {
-                // Check if we have a selected GitHub repo or Replit app
-                const githubRepo = localStorage.getItem('githubRepo');
-                const githubRepoPath = localStorage.getItem('githubRepoPath');
-                const githubToken = localStorage.getItem('githubSessionToken');
-                
                 if (githubRepo && githubToken) {
                     // Load GitHub repository file tree
                     await loadGithubFileTree(githubRepo, githubRepoPath, githubToken);
-                } else {
-                    // Load local file tree (fallback)
+                } else if (replitApp) {
+                    // Load Replit app file tree (fallback to local for now)
                     const response = await fetch('/api/files/tree');
                     const tree = await response.json();
-                    fileTreeDiv.innerHTML = renderTree(tree);
+                    fileTreeDiv.innerHTML = `
+                        <div style="color: #10b981; margin-bottom: 10px; padding: 8px; background: rgba(16, 185, 129, 0.1); border-radius: 4px; font-size: 0.85em;">
+                            🔄 ${replitApp}
+                        </div>
+                        ${renderTree(tree)}
+                    `;
                 }
             } catch (error) {
                 console.error('Error loading file tree:', error);
-                fileTreeDiv.innerHTML = '<div style="color: #ef4444;">Error loading file tree</div>';
+                fileTreeDiv.innerHTML = `
+                    <div style="color: #ef4444; padding: 20px; text-align: center; background: rgba(239, 68, 68, 0.1); border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.3);">
+                        <div style="font-size: 1.5em; margin-bottom: 10px;">⚠️</div>
+                        <div>Error loading file tree</div>
+                        <div style="font-size: 0.85em; opacity: 0.8; margin-top: 5px;">${error.message}</div>
+                    </div>
+                `;
             }
         }
 
@@ -1155,10 +1184,10 @@
             }
         }
 
-        // Load file tree on page load
+        // Load file tree on page load (only if authenticated)
         window.addEventListener('load', () => {
-            loadFileTree();
             loadSavedSettings();
+            loadFileTree();  // Will show "not connected" if no repo is selected
         });
     </script>
 </body>
