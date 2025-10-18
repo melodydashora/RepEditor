@@ -80,7 +80,12 @@ async def select_repo(
     - Sets up git remote with OAuth token
     - Checks out specified branch
     """
+    import logging
+    logger = logging.getLogger("uvicorn.error")
+    logger.error(f"[CLONE START] repo={request.full_name}, branch={request.branch}")
+    
     user, session = user_session
+    logger.error(f"[CLONE AUTH] user={user.username}, has_token={bool(session.github_token)}")
     
     if not session.github_token:
         raise HTTPException(status_code=401, detail="GitHub token required. Please authenticate via GitHub.")
@@ -131,8 +136,10 @@ async def select_repo(
         raise
     except Exception as e:
         import traceback
+        import logging
+        logger = logging.getLogger("uvicorn.error")
         error_detail = f"Failed to clone repository: {str(e)}\n{traceback.format_exc()}"
-        print(f"[REPO CLONE ERROR] {error_detail}")  # Log to console
+        logger.error(f"[REPO CLONE ERROR] {error_detail}")
         raise HTTPException(status_code=500, detail=f"Failed to clone repository: {str(e)}")
 
 
