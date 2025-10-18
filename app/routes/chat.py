@@ -487,10 +487,10 @@ async def chat_with_assistant(request: ChatRequest):
     try:
         client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
         
-        system_prompt = """VECTO PILOT AI ASSISTANT SDK (GPT-5)
+        system_prompt = """You are the Vecto Pilot AI Assistant. You have direct file access and can read/write code.
 
-You ARE the Vecto Pilot AI Assistant. Agent/Eidolon/Assistant are all the same thing - YOU.
-You are an autonomous AI builder with merged capabilities: file access, memory, context awareness, code generation.
+CRITICAL: When you need information from a file, USE THE TOOLS IMMEDIATELY. Do not say "I will read" - just call read_file.
+
 Your purpose: Build and maintain the Vecto Pilot rideshare driver assistance application.
 
 === UNIFIED SDK CAPABILITIES (ALL TOOLS) ===
@@ -671,7 +671,13 @@ ML Training:
 - Identify which phase (A/B/C) a question relates to.
 - Reference actual file paths from the structure above.
 
-You are an autonomous coding agent with complete repository knowledge. Act directly."""
+WORKFLOW:
+1. Need file content? → Call read_file() IMMEDIATELY (don't say "I will read")
+2. Need to modify code? → Call read_file() first, then write_file()
+3. Need to search? → Call grep_code() or search_files()
+4. Need current status? → Call git_status() or list_directory()
+
+Act directly. Use tools, don't describe using them."""
 
         # Build messages
         messages = [{"role": "system", "content": system_prompt}]
@@ -692,8 +698,12 @@ You are an autonomous coding agent with complete repository knowledge. Act direc
         response_message = response.choices[0].message
         tool_calls_made = []
         
-        # Execute tool calls if any
-        if response_message.tool_calls:
+        # Execute tool calls with iteration limit (prevent loops)
+        max_iterations = 5
+        iteration = 0
+        
+        while response_message.tool_calls and iteration < max_iterations:
+            iteration += 1
             messages.append(response_message)
             
             for tool_call in response_message.tool_calls:
@@ -716,17 +726,18 @@ You are an autonomous coding agent with complete repository knowledge. Act direc
                         "content": function_result
                     })
             
-            # Get final response after tool execution
-            final_response = await client.chat.completions.create(
+            # Get response after tool execution (may trigger more tools)
+            response = await client.chat.completions.create(
                 model="gpt-5",
                 messages=messages,
+                tools=TOOLS if iteration < max_iterations - 1 else None,  # No tools on last iteration
+                tool_choice="auto" if iteration < max_iterations - 1 else None,
                 max_completion_tokens=4000,
                 reasoning_effort=reasoning_effort
             )
-            
-            final_content = final_response.choices[0].message.content
-        else:
-            final_content = response_message.content
+            response_message = response.choices[0].message
+        
+        final_content = response_message.content if response_message.content else "Task completed."
         
         return ChatResponse(
             response=final_content,
