@@ -15,7 +15,7 @@ import uvicorn
 
 from app.core.config import settings, engine
 from app.models.database import Base
-from app.routes import chat, files, health, config, auth, repos
+from app.routes import chat, files, health, config, auth, repos, ai, ssh
 
 
 # Lifespan context manager for startup/shutdown
@@ -283,6 +283,8 @@ app.mount("/static", StaticFiles(directory="app/static"), name="static")
 # Register API routers
 app.include_router(auth.router)  # Authentication (GitHub OAuth + username/password)
 app.include_router(repos.router)  # Repository cloning and git operations
+app.include_router(ai.router)  # AI autofix system (GPT-5 + Codex)
+app.include_router(ssh.router)  # SSH access to Replit apps
 app.include_router(chat.router)  # AI chat interface
 app.include_router(chat.providers_router)  # AI provider models endpoint
 app.include_router(files.router)  # File operations
