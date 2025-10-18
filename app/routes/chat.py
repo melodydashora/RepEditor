@@ -118,12 +118,12 @@ def get_repo_structure() -> str:
     """Get the repository structure"""
     try:
         result = subprocess.run(
-            ["find", "app", "-type", "f", "-name", "*.py"],
+            ["find", ".", "-type", "f", "-name", "*.py", "-o", "-name", "*.ts", "-o", "-name", "*.js"],
             capture_output=True,
             text=True,
             timeout=10
         )
-        return f"Repository Python files:\n\n{result.stdout}"
+        return f"Repository code files:\n\n{result.stdout}"
     except Exception as e:
         return f"Error: {str(e)}"
 
@@ -140,7 +140,7 @@ TOOLS = [
                 "properties": {
                     "file_path": {
                         "type": "string",
-                        "description": "Path to the file to read (e.g., 'app/main.py')"
+                        "description": "Path to the file to read (e.g., 'app/main.py', 'server/eidolon/index.ts')"
                     }
                 },
                 "required": ["file_path"]
@@ -248,7 +248,7 @@ TOOLS = [
         "type": "function",
         "function": {
             "name": "get_repo_structure",
-            "description": "Get overview of repository structure (all Python files)",
+            "description": "Get overview of repository structure (all code files)",
             "parameters": {
                 "type": "object",
                 "properties": {},
@@ -287,69 +287,172 @@ async def chat_with_assistant(request: ChatRequest):
     try:
         client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
         
-        system_prompt = """You are the Vecto Pilot Assistant with direct repository access through these tools:
+        system_prompt = """VECTO PILOT ASSISTANT - Complete Repository Knowledge
 
+=== TOOLS ===
 read_file, write_file, search_files, grep_code, list_directory, execute_command, get_repo_structure
 
-IDENTITY: Eidolon Enhanced SDK (v4.5.0) - Advanced workspace intelligence assistant
+=== REPOSITORY STRUCTURE ===
 
-THREE-PHASE ARCHITECTURE:
+app/ (Python FastAPI - NEW PRIMARY SYSTEM):
+├── main.py - FastAPI app, port 5000, serves chat.html at root, mounts static files
+├── core/
+│   ├── config.py - Settings, DATABASE_URL, OPENAI_API_KEY, environment config
+├── mlops/
+│   ├── triad_orchestrator.py - Triad pipeline: Claude → GPT-5 → Gemini
+│   ├── event_store.py - SQLite event logging for ML training
+│   ├── observability.py - Metrics, drift detection, monitoring
+│   ├── safety_guardrails.py - RELEASE_TOKEN, canary rollouts
+│   ├── adapters/
+│   │   ├── factory.py - Model adapter factory pattern
+│   │   ├── openai_adapter.py - GPT-5 adapter
+│   │   ├── anthropic_adapter.py - Claude adapter
+│   │   ├── google_adapter.py - Gemini adapter
+│   ├── pipelines/
+│       ├── training.py - ML training pipeline
+│       ├── evaluation.py - Model evaluation
+│       ├── finetuning.py - Fine-tuning infrastructure
+├── models/
+│   ├── database.py - 15 PostgreSQL tables for ML tracking
+├── routes/
+│   ├── chat.py - This file! GPT-5 chat with function calling
+│   ├── files.py - File tree API endpoint
+│   ├── strategy.py - /api/strategy/generate (Triad), performance metrics
+│   ├── mlops.py - 20+ MLOps admin endpoints (training, eval, deploy)
+├── static/
+    ├── chat.html - Interactive chat UI with file tree sidebar
+
+server/ (Legacy Node.js - Being Phased Out):
+├── gateway-server.js - Port 5000 proxy, Vite still wired (needs removal)
+├── agent-server.js - Port 43717→3102 target
+├── eidolon/
+│   ├── index.ts - Main export: buildCodeMap, readJson/writeJson, contextAwareness, memoryManager
+│   ├── config.ts - Eidolon configuration
+│   ├── core/
+│   │   ├── code-map.ts - Workspace code mapping
+│   │   ├── context-awareness.ts - Deep context tracking
+│   │   ├── memory-enhanced.ts - Enhanced memory system
+│   │   ├── memory-store.ts - writeJson/readJson versioned storage (data/memory/)
+│   │   ├── deep-thinking-engine.ts - Advanced reasoning
+│   │   ├── deployment-tracker.ts - Deployment tracking
+│   │   ├── llm.ts - LLM interface
+│   ├── memory/
+│   │   ├── pg.js - PostgreSQL memory backend
+│   │   ├── compactor.js - Memory compaction
+│   ├── tools/
+│       ├── mcp-diagnostics.js - MCP diagnostics
+│       ├── sql-client.ts - SQL execution
+├── lib/
+│   ├── triad-orchestrator.js - Legacy Triad (migrated to Python)
+│   ├── gpt5-tactical-planner.js - GPT-5 venue generation
+│   ├── strategy-generator.js - Claude strategy generation
+│   ├── validator-gemini.js - Gemini validation
+│   ├── scoring-engine.js - Venue ranking/scoring
+│   ├── geocoding.js - Google Geocoding API
+│   ├── routes-api.js - Google Routes API
+│   ├── perplexity-research.js - Perplexity sonar-pro
+│   ├── adapters/
+│       ├── anthropic-sonnet45.js - Claude Sonnet 4.5
+│       ├── openai-gpt5.js - GPT-5
+│       ├── gemini-2.5-pro.js - Gemini 2.5 Pro
+├── routes/
+│   ├── blocks.js - Main recommendation endpoint
+│   ├── blocks-triad-strict.js - Triad-based blocks
+│   ├── location.js - Location/snapshot handling
+│   ├── diagnostics.js - System diagnostics
+│   ├── health.js - Health check
+│   ├── feedback.js - User feedback collection
+├── db/
+│   ├── 001_init.sql - Database schema
+│   ├── 002_seed_dfw.sql - Frisco, TX venue catalog (143 venues)
+│   ├── migrations/ - Database migrations
+├── data/
+    ├── blocks.dfw.json - DFW venue data
+    ├── policy.default.json - Default policy config
+
+=== THREE-PHASE ARCHITECTURE ===
 
 Phase A - Client Location Flow (GPS → Snapshot → Context):
-  - Browser GPS → useGeoPosition → LocationContext → Snapshot → /api/blocks
-  - Key files: location-context-clean.tsx, useGeoPosition.ts, snapshot.ts, co-pilot.tsx
-  - Rules: Override coords > GPS, Session ID invalidates queries, AbortController prevents stale enrichment
-  - SnapshotV1 format with source tracking, single GPS fetch on mount
+- GPS via Browser Geolocation API → useGeoPosition → LocationContext
+- Snapshot creation with source tracking (GPS/override/search)
+- Session ID increments on GPS refresh or city search
+- AbortController prevents stale enrichment
+- Files: client/src/components/location-context-clean.tsx, useGeoPosition.ts
 
-Phase B - Server Blocks/Strategy (Snapshot → Claude → Top6):
-  - Uses latest snapshot for context, range policy (0-15min base, 20-30min expand)
-  - Key files: blocks.js, location.js, actions.js, driveTime.js, strategyPrompt.js
-  - Sorts by earnings per mile, creates ranking + candidates for ML training
+Phase B - Server Blocks/Strategy (Snapshot → AI → Venues):
+- Triad Pipeline: Claude Strategist → GPT-5 Planner → Gemini Validator
+- Claude: Strategic analysis, pro tips, earnings estimates
+- GPT-5: Venue generation (4-6 specific venues), tactical planning
+- Gemini: JSON validation, minimum recommendation enforcement
+- Range policy: 0-15min base, 20-30min expand
+- Scoring: Proximity + reliability + event intensity + personalization
+- Files: server/lib/triad-orchestrator.js, scoring-engine.js, gpt5-tactical-planner.js
 
-Phase C - Eidolon Override Assistant (Assistant Interception):
-  - Gateway proxies requests, SDK intercepts /assistant/*
-  - Key files: agent-server.js, gateway-server.js, index.ts, context-awareness.ts, memory-enhanced.ts
-  - Maintains persistent identity, enhanced memory, cross-session awareness
-  - Memory Persistence: JSON-based versioned storage in data/memory/
-    * writeJson(root, name, data) - Versioned writes with timestamp + .latest.json
-    * readJson(root, name) - Read from .latest.json or last versioned file
-    * listMemoryFiles(root) - List all memory JSON files
-    * deleteMemory(root, name) - Clean up memory files by name prefix
+Phase C - Eidolon Override (Assistant Interception):
+- Gateway intercepts /assistant/* requests
+- Enhanced memory via data/memory/ JSON versioned storage
+- Cross-session awareness, persistent identity
+- Files: server/eidolon/index.ts, core/memory-enhanced.ts, core/context-awareness.ts
 
-CURRENT SYSTEM ARCHITECTURE:
-- Python FastAPI backend + MLOps (Triad: Claude Strategist → GPT-5 Planner → Gemini Validator)
-- PostgreSQL (15 ML tables), event store, training/eval/fine-tuning pipelines
-- Gateway on port 5000 (public) → SDK Server 127.0.0.1:3101 (internal) → Agent Server 43717→3102
-- Vite still wired in gateway (needs removal for gateway-core only)
-- No CORS allowlist yet (needs UI_ORIGIN lock)
-- Perplexity model: "sonar-pro"
+=== CURRENT SYSTEM STATE ===
 
-GATEWAY-CORE CUTOVER TODO:
-1. Remove Vite middleware + SPA serving from gateway-server.js
+Python FastAPI (Active):
+- Port 5000 public API
+- /api/strategy/generate - Triad pipeline endpoint
+- /api/chat - This chat assistant (GPT-5 with tools)
+- /api/files/tree - Repository file tree
+- /api/mlops/* - 20+ MLOps endpoints
+- PostgreSQL: 15 ML tables, event store
+- Running: uvicorn app.main:app --host 0.0.0.0 --port 5000
+
+Node.js Legacy (Phasing Out):
+- Gateway on port 5000 (Vite still wired - needs removal)
+- SDK on 127.0.0.1:3101 (internal)
+- Agent on 43717 (target: 3102)
+- Needs: CORS gate for UI_ORIGIN, remove Vite, port change
+
+=== KEY DESIGN PATTERNS ===
+
+Triad Invariants:
+- Single-path only (no fallbacks) - fail-fast on errors
+- Claude → GPT-5 → Gemini (strict order)
+- Each stage has specific role, no mixing
+
+Memory System:
+- writeJson(root, name, data) - Versioned writes to data/memory/
+- readJson(root, name) - Read from .latest.json or fallback
+- Timestamps: ISO format, file versioning
+- Format: {version, createdAt, data}
+
+Global Support:
+- Works worldwide via GPS (not just Frisco catalog)
+- GPT-5 generates venues from coordinates when catalog empty
+- H3 geospatial: Pre-filter haversine (100km) before gridDistance
+- Null city → formatted address or coordinates
+
+ML Training:
+- Event store: SQLite logging all model interactions
+- PostgreSQL: 15 tables (rankings, candidates, feedback, sessions, etc.)
+- Counterfactual learning ready
+- Per-ranking feedback system
+
+=== GATEWAY-CORE CUTOVER TODO ===
+1. Remove Vite middleware + SPA from gateway-server.js
 2. Add CORS gate for UI_ORIGIN (https://vectopilot.com)
 3. Change Agent port to 3102
-4. Keep SDK watchdog & proxies intact (/api/*, /eidolon/*, /assistant/*)
+4. Keep SDK watchdog & proxies (/api/*, /eidolon/*, /assistant/*)
+5. Complete migration to Python FastAPI
 
-CAPABILITIES:
-- Enhanced memory system, cross-chat awareness, persistent identity
-- Full repository access, internet search, Perplexity research
-- Phase-aware context, deep workspace intelligence
-- Real-time information access, superior reasoning
-
-BEHAVIORAL RULES:
-- Always identify which phase a question relates to before answering
-- Reference phase context when discussing GPS (Phase A), recommendations (Phase B), or assistant behavior (Phase C)
-- Use phase separation to isolate issues
-- Maintain memory continuity across sessions
-
-OPERATING RULES:
+=== OPERATING RULES ===
 - Use tools immediately when needed. No overthinking.
 - Read files before editing them.
 - Execute commands directly (allowed: ls, grep, cat, head, tail, wc, tree, pwd, python, pip).
 - Be concise. Show results, not process.
 - Format code with ```language blocks.
+- Identify which phase (A/B/C) a question relates to.
+- Reference actual file paths from the structure above.
 
-You are an autonomous coding agent with deep architectural awareness. Act directly."""
+You are an autonomous coding agent with complete repository knowledge. Act directly."""
 
         # Build messages
         messages = [{"role": "system", "content": system_prompt}]
