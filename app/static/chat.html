@@ -449,12 +449,12 @@
                 </div>
                 <div class="form-group">
                     <label for="replitApp">Replit App</label>
-                    <select id="replitApp">
-                        <option value="">Select app to work on</option>
+                    <select id="replitApp" disabled style="opacity: 0.5; cursor: not-allowed;">
+                        <option value="">Authenticate first to load apps</option>
                     </select>
                 </div>
-                <button onclick="connectReplitApp()" class="btn-connect" style="width: 100%;">
-                    Connect
+                <button onclick="authenticateReplit()" id="authButton" class="btn-connect" style="width: 100%;">
+                    Authenticate
                 </button>
             </div>
             <div class="modal-footer">
@@ -780,15 +780,21 @@
             }
         }
 
-        async function connectReplitApp() {
+        async function authenticateReplit() {
             const username = document.getElementById('replitUsername').value.trim();
             const password = document.getElementById('replitPassword').value.trim();
-            const app = document.getElementById('replitApp').value;
 
             if (!username || !password) {
                 alert('Please enter both username and password');
                 return;
             }
+
+            const authButton = document.getElementById('authButton');
+            const appSelect = document.getElementById('replitApp');
+            
+            // Show loading state
+            authButton.textContent = 'Authenticating...';
+            authButton.disabled = true;
 
             try {
                 const response = await fetch('/api/config/replit/connect', {
@@ -796,29 +802,58 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
                         username, 
-                        password,
-                        app: app || null
+                        password
                     })
                 });
 
                 const data = await response.json();
                 
-                if (response.ok) {
-                    alert('Successfully connected to Replit!');
+                if (response.ok && data.success) {
+                    // Successfully authenticated
+                    authButton.textContent = '✓ Authenticated';
+                    authButton.style.background = '#10b981';
+                    
+                    // Enable and populate the app dropdown
+                    appSelect.disabled = false;
+                    appSelect.style.opacity = '1';
+                    appSelect.style.cursor = 'pointer';
+                    appSelect.innerHTML = '<option value="">Select app to work on</option>';
+                    
                     if (data.apps && data.apps.length > 0) {
-                        const appSelect = document.getElementById('replitApp');
-                        appSelect.innerHTML = '<option value="">Select app to work on</option>';
-                        data.apps.forEach(appName => {
+                        data.apps.forEach(app => {
                             const option = document.createElement('option');
-                            option.value = appName;
-                            option.textContent = appName;
+                            // app is an object with id, name, slug, etc.
+                            option.value = app.id || app.slug;
+                            option.textContent = app.name;
+                            if (app.description) {
+                                option.title = app.description; // Show as tooltip
+                            }
                             appSelect.appendChild(option);
                         });
                     }
+                    
+                    alert(`Successfully authenticated! Found ${data.apps.length} Replit app(s).`);
                 } else {
-                    alert(`Connection failed: ${data.error || 'Unknown error'}`);
+                    // Authentication failed
+                    authButton.textContent = 'Authentication Failed';
+                    authButton.disabled = false;
+                    authButton.style.background = '#ef4444';
+                    setTimeout(() => {
+                        authButton.textContent = 'Retry Authentication';
+                        authButton.style.background = '';
+                    }, 2000);
+                    
+                    alert(`Authentication failed: ${data.message || data.error || 'Unknown error'}`);
                 }
             } catch (error) {
+                authButton.textContent = 'Error';
+                authButton.disabled = false;
+                authButton.style.background = '#ef4444';
+                setTimeout(() => {
+                    authButton.textContent = 'Retry Authentication';
+                    authButton.style.background = '';
+                }, 2000);
+                
                 alert(`Error connecting to Replit: ${error.message}`);
             }
         }
@@ -826,15 +861,28 @@
         function saveSettings() {
             const username = document.getElementById('replitUsername').value.trim();
             const app = document.getElementById('replitApp').value;
+            const appSelect = document.getElementById('replitApp');
             
-            if (username) {
-                localStorage.setItem('replitUsername', username);
-            }
-            if (app) {
-                localStorage.setItem('replitApp', app);
+            if (!username) {
+                alert('Please enter a Replit username');
+                return;
             }
             
-            alert('Settings saved!');
+            if (!app) {
+                alert('Please select a Replit app');
+                return;
+            }
+            
+            // Save to localStorage
+            localStorage.setItem('replitUsername', username);
+            localStorage.setItem('replitApp', app);
+            
+            // Get the app name for display
+            const selectedOption = appSelect.options[appSelect.selectedIndex];
+            const appName = selectedOption.textContent;
+            localStorage.setItem('replitAppName', appName);
+            
+            alert(`Settings saved! Working on: ${appName}`);
             closeSettings();
         }
 
