@@ -185,8 +185,13 @@ async def get_repo_tree(
     """
     root = Path(repo_path).resolve()
     
-    # Security: ensure path is within CLONE_ROOT
-    if CLONE_ROOT not in root.parents and root != CLONE_ROOT:
+    # Security: ensure path is either:
+    # 1. Within CLONE_ROOT (cloned external repos)
+    # 2. The BASE_DIR itself (current workspace repo)
+    is_in_clone_root = CLONE_ROOT in root.parents or root == CLONE_ROOT
+    is_base_dir = root == BASE_DIR
+    
+    if not (is_in_clone_root or is_base_dir):
         raise HTTPException(status_code=403, detail="Access denied")
     
     if not root.exists():
@@ -234,8 +239,11 @@ async def get_file_content(
     """
     root = Path(repo_path).resolve()
     
-    # Security checks
-    if CLONE_ROOT not in root.parents and root != CLONE_ROOT:
+    # Security checks - allow CLONE_ROOT repos or BASE_DIR workspace
+    is_in_clone_root = CLONE_ROOT in root.parents or root == CLONE_ROOT
+    is_base_dir = root == BASE_DIR
+    
+    if not (is_in_clone_root or is_base_dir):
         raise HTTPException(status_code=403, detail="Access denied")
     
     file = (root / file_path).resolve()
