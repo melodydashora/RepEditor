@@ -78,11 +78,11 @@ def create_session(db: Session, user_id: int, github_token: Optional[str] = None
     return session
 
 
-async def get_current_user(
+async def get_current_session(
     request: Request,
     db: Session = Depends(get_db)
-) -> User:
-    """Dependency to get the current authenticated user"""
+) -> tuple[User, AuthSession]:
+    """Dependency to get the current authenticated user and session"""
     auth_header = request.headers.get("Authorization")
     if not auth_header or not auth_header.startswith("Bearer "):
         raise HTTPException(
@@ -113,6 +113,15 @@ async def get_current_user(
     session.last_activity = datetime.utcnow()
     db.commit()
     
+    return user, session
+
+
+async def get_current_user(
+    request: Request,
+    db: Session = Depends(get_db)
+) -> User:
+    """Dependency to get the current authenticated user"""
+    user, _ = await get_current_session(request, db)
     return user
 
 
