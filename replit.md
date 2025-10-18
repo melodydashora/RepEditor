@@ -71,6 +71,27 @@ Required secrets:
 - `GOOGLEAQ_API_KEY` - Google AI API key
 - `APP_BASE_URL` - Application base URL for OAuth callbacks
 
+## Extension Setup
+
+To activate the Vecto Pilot AI extension in any Replit workspace:
+
+1. **Add to `.replit` file:**
+   ```toml
+   [extension]
+   isExtension = true
+   extensionID = "gpt-repo-access"
+   ```
+
+2. **Configure in Extensions UI:**
+   - Enable permissions: Read, Write & Execute, ReplDB, Experimental APIs, Network
+   - Add Tool: "Vecto Pilot AI" at `/panel` with icon `/icon.svg`
+   - Add Tool: "Diff Viewer" at `/diff` with icon `/icon.svg`
+   - (Optional) File Handler: `/diff` for `diff,patch` extensions
+
+3. **Load:** Click "Save Changes" → "Load Locally" → Extension appears in sidebar!
+
+See `EXTENSION_SETUP.md` for detailed instructions.
+
 ## Recent Updates
 
 ### October 18, 2025 - Late Evening

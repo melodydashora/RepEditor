@@ -300,6 +300,20 @@ async def extension_icon():
     return FileResponse("app/static/icon.svg")
 
 
+@app.get("/diff.html")
+async def extension_diff():
+    """Extension diff viewer HTML"""
+    from fastapi.responses import FileResponse
+    return FileResponse("app/static/diff.html")
+
+
+@app.get("/diff.js")
+async def extension_diff_js():
+    """Extension diff viewer JavaScript"""
+    from fastapi.responses import FileResponse
+    return FileResponse("app/static/diff.js")
+
+
 # ============================================================================
 # API ROUTES
 # ============================================================================

@@ -38,7 +38,7 @@ expertMode = true
 
 [extension]
 isExtension = true
-extensionID = "repeditor-gpt-access"
+extensionID = "gpt-repo-access"
 
 [[ports]]
 localPort = 3101
@@ -55,12 +55,12 @@ localPort = 5000
 externalPort = 80
 
 [[ports]]
-localPort = 36233
-externalPort = 3002
-
-[[ports]]
 localPort = 36633
 externalPort = 3000
+
+[[ports]]
+localPort = 44749
+externalPort = 3002
 
 [deployment]
 run = ["node", "gateway-server.js"]

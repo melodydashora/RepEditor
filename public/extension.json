@@ -5,7 +5,13 @@
     {
       "handler": "/api/chat/frame",
       "name": "GPT Access"
-    }
+    },
+
+    {
+    name: "Vecto Pilot AI",
+    icon: "/icon.svg",
+    handler: "/panel"
+  }
   ],
   scopes: [
 
