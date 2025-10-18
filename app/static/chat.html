@@ -71,9 +71,41 @@
             border-radius: 12px;
             margin-bottom: 20px;
             box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-        .header h1 { font-size: 2em; margin-bottom: 10px; }
-        .header p { opacity: 0.9; }
+        .header-content h1 { font-size: 2em; margin-bottom: 10px; }
+        .header-content p { opacity: 0.9; }
+        .header-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .header-controls select {
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            font-size: 0.9em;
+            font-weight: 600;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+        .header-controls select:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+        .header-controls select:focus {
+            border-color: white;
+        }
+        .header-controls select option {
+            background: #1e293b;
+            color: #e2e8f0;
+        }
         .chat-container {
             background: #1e293b;
             border-radius: 12px;
@@ -190,9 +222,25 @@
     <div class="layout">
         <div class="main-content">
             <div class="header">
-            <h1>🤖 Vecto Pilot AI Assistant</h1>
-            <p>GPT-5 with FULL repo access - read files, write code, search, execute commands</p>
-        </div>
+                <div class="header-content">
+                    <h1>🤖 Vecto Pilot AI Assistant</h1>
+                    <p>Choose your AI provider, model, and parameters</p>
+                </div>
+                <div class="header-controls">
+                    <select id="providerSelect" onchange="onProviderChange()">
+                        <option value="">Select Provider</option>
+                        <option value="openai">OpenAI</option>
+                        <option value="anthropic">Anthropic</option>
+                        <option value="gemini">Google Gemini</option>
+                    </select>
+                    <select id="modelSelect" onchange="onModelChange()" style="display: none;">
+                        <option value="">Select Model</option>
+                    </select>
+                    <select id="paramsSelect" style="display: none;">
+                        <option value="">Select Parameters</option>
+                    </select>
+                </div>
+            </div>
 
         <div class="chat-container" id="chatContainer">
             <div class="message assistant-message">
@@ -242,6 +290,127 @@
         const chatContainer = document.getElementById('chatContainer');
         const messageInput = document.getElementById('messageInput');
         const sendBtn = document.getElementById('sendBtn');
+        
+        // Current AI configuration
+        let currentProvider = null;
+        let currentModel = null;
+        let currentParams = {};
+
+        // Handle provider selection
+        async function onProviderChange() {
+            const providerSelect = document.getElementById('providerSelect');
+            const modelSelect = document.getElementById('modelSelect');
+            const paramsSelect = document.getElementById('paramsSelect');
+            
+            currentProvider = providerSelect.value;
+            
+            if (!currentProvider) {
+                modelSelect.style.display = 'none';
+                paramsSelect.style.display = 'none';
+                return;
+            }
+            
+            // Show model dropdown and fetch available models
+            modelSelect.style.display = 'inline-block';
+            modelSelect.innerHTML = '<option value="">Loading models...</option>';
+            
+            try {
+                const response = await fetch(`/api/providers/${currentProvider}/models`);
+                const data = await response.json();
+                
+                modelSelect.innerHTML = '<option value="">Select Model</option>';
+                data.models.forEach(model => {
+                    const option = document.createElement('option');
+                    option.value = model.id;
+                    option.textContent = model.name || model.id;
+                    modelSelect.appendChild(option);
+                });
+            } catch (error) {
+                modelSelect.innerHTML = '<option value="">Error loading models</option>';
+                addMessage(`Error fetching models for ${currentProvider}: ${error.message}`, 'assistant');
+            }
+        }
+
+        // Handle model selection
+        function onModelChange() {
+            const modelSelect = document.getElementById('modelSelect');
+            const paramsSelect = document.getElementById('paramsSelect');
+            
+            currentModel = modelSelect.value;
+            
+            if (!currentModel) {
+                paramsSelect.style.display = 'none';
+                return;
+            }
+            
+            // Show parameters dropdown based on provider
+            paramsSelect.style.display = 'inline-block';
+            paramsSelect.innerHTML = '<option value="">Select Parameters</option>';
+            
+            if (currentProvider === 'openai') {
+                // OpenAI parameters
+                const params = [
+                    { value: 'reasoning_effort:minimal', label: 'Reasoning: Minimal (fast)' },
+                    { value: 'reasoning_effort:low', label: 'Reasoning: Low' },
+                    { value: 'reasoning_effort:medium', label: 'Reasoning: Medium' },
+                    { value: 'reasoning_effort:high', label: 'Reasoning: High (deep)' },
+                    { value: 'verbosity:low', label: 'Verbosity: Low (concise)' },
+                    { value: 'verbosity:medium', label: 'Verbosity: Medium' },
+                    { value: 'verbosity:high', label: 'Verbosity: High (detailed)' },
+                    { value: 'max_tokens:1000', label: 'Max Tokens: 1000' },
+                    { value: 'max_tokens:4000', label: 'Max Tokens: 4000' },
+                    { value: 'max_tokens:8000', label: 'Max Tokens: 8000' }
+                ];
+                
+                params.forEach(param => {
+                    const option = document.createElement('option');
+                    option.value = param.value;
+                    option.textContent = param.label;
+                    paramsSelect.appendChild(option);
+                });
+                
+                // Add multiple selection support
+                paramsSelect.onchange = function() {
+                    const [key, value] = this.value.split(':');
+                    currentParams[key] = value;
+                };
+            } else if (currentProvider === 'anthropic') {
+                const params = [
+                    { value: 'thinking:enabled', label: 'Extended Thinking: Enabled' },
+                    { value: 'max_tokens:4096', label: 'Max Tokens: 4096' },
+                    { value: 'max_tokens:8192', label: 'Max Tokens: 8192' }
+                ];
+                
+                params.forEach(param => {
+                    const option = document.createElement('option');
+                    option.value = param.value;
+                    option.textContent = param.label;
+                    paramsSelect.appendChild(option);
+                });
+                
+                paramsSelect.onchange = function() {
+                    const [key, value] = this.value.split(':');
+                    currentParams[key] = value;
+                };
+            } else if (currentProvider === 'gemini') {
+                const params = [
+                    { value: 'thinking:adaptive', label: 'Thinking Mode: Adaptive' },
+                    { value: 'max_tokens:8192', label: 'Max Tokens: 8192' }
+                ];
+                
+                params.forEach(param => {
+                    const option = document.createElement('option');
+                    option.value = param.value;
+                    option.textContent = param.label;
+                    paramsSelect.appendChild(option);
+                });
+                
+                paramsSelect.onchange = function() {
+                    const [key, value] = this.value.split(':');
+                    currentParams[key] = value;
+                };
+            }
+        }
 
         async function sendMessage() {
             const message = messageInput.value.trim();
@@ -253,11 +422,20 @@
             sendBtn.disabled = true;
 
             try {
+                // Build request with provider/model/params if selected
+                const requestBody = { message };
+                
+                if (currentProvider && currentModel) {
+                    requestBody.provider = currentProvider;
+                    requestBody.model = currentModel;
+                    requestBody.params = currentParams;
+                }
+                
                 // Call your backend API endpoint
                 const response = await fetch('/api/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message })
+                    body: JSON.stringify(requestBody)
                 });
 
                 const data = await response.json();
@@ -265,7 +443,7 @@
                 // Add assistant response with tool calls
                 addMessage(data.response || 'Sorry, I encountered an error.', 'assistant', data.tool_calls);
             } catch (error) {
-                addMessage('Error: Unable to connect to AI assistant. Make sure OPENAI_API_KEY is configured.', 'assistant');
+                addMessage(`Error: ${error.message}. Make sure API keys are configured.`, 'assistant');
             }
 
             sendBtn.disabled = false;
