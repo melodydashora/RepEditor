@@ -1,65 +1,39 @@
 {
-  "id": "gpt-repo-access",
   "name": "GPT Repository Access",
-  "version": "0.1.0",
   "description": "Direct GPT-5 access with full repository control — read files, edit code, run commands.",
-  "permissions": [
-    "read",
-    "write-exec",
-    "repldb:read",
-    "repldb:write",
-    "experimental-api",
-    "network"
+  "longDescription": "Vecto Pilot AI (Unified SDK • GPT-5) plans → diffs → commits.\n- Browser holds your GitHub token (PAT or Device Flow)\n- Server clones per-request, applies unified diff, pushes branch, opens PR\n- Optional local-Repl FS bridge via experimental APIs",
+  "icon": "/icon.svg",
+  "tags": ["ai", "gpt5", "repo", "code", "assistant"],
+  "coverImages": [
+    { "path": "/cover1.png", "label": "Plan → Diff → PR" }
   ],
-  "panels": [
+  "website": "https://dev.melodydashora.dev",
+  "authorEmail": "melody@vectopilot.com",
+  "fileHandlers": [
     {
-      "id": "main",
-      "title": "GPT Repository Access",
-      "icon": "icon.svg",
-      "html": "panel.html",
-      "location": "right",
-      "width": 420
+      "glob": "**/*.{diff,patch}",
+      "handler": "/diff.html",
+      "name": "Diff Viewer",
+      "icon": "/icon.svg"
     }
   ],
-  "commands": [
-    { "id": "open", "title": "Open GPT Repository Access", "panel": "main" }
-  ],
-  scopes: [
-
+  "tools": [
     {
-      name: "read",
-      reason: "Read any file in your App"
+      "handler": "/panel.html",
+      "name": "Vecto Pilot AI",
+      "icon": "/icon.svg"
     },
-
     {
-    name: "write-exec",
-    reason: "Write to any file in your App and execute any code"
-  },
-
-    {
-    name: "repldb:read",
-    reason: "Read any key, or list all keys under any prefix in the repldb belonging to your App"
-  },
-
-    {
-    name: "repldb:write",
-    reason: "Write or delete any key in the repldb belonging to your App"
-  },
-
-    {
-    name: "experimental-api",
-    reason: "Use experimental APIs that may be unstable, change in behavior, or be removed entirely"
-  }
-
-  ],
-  fileHandlers: [
-
-    {
-      name: "extension.json",
-      icon: "icon.svg",
-      handler: "panel.html",
-      glob: "panel.js"
+      "handler": "/diff.html",
+      "name": "Diff Viewer",
+      "icon": "/icon.svg"
     }
-
+  ],
+  "scopes": [
+    { "name": "read", "reason": "Read any file in your App" },
+    { "name": "write-exec", "reason": "Write to files and run shell/commands for fixes" },
+    { "name": "repldb:read", "reason": "Load cached plans/diffs for this App" },
+    { "name": "repldb:write", "reason": "Store cached plans/diffs and settings" },
+    { "name": "experimental-api", "reason": "Use experimental fs/process APIs from the pane" }
   ]
 }

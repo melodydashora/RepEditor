@@ -276,42 +276,42 @@ async def chat_page():
 async def extension_manifest():
     """Replit Extension manifest for workspace tool"""
     from fastapi.responses import FileResponse
-    return FileResponse("app/static/extension.json")
+    return FileResponse("public/extension.json")
 
 
 @app.get("/panel.html")
 async def extension_panel():
     """Extension panel HTML"""
     from fastapi.responses import FileResponse
-    return FileResponse("app/static/panel.html")
+    return FileResponse("public/panel.html")
 
 
 @app.get("/panel.js")
 async def extension_panel_js():
     """Extension panel JavaScript"""
     from fastapi.responses import FileResponse
-    return FileResponse("app/static/panel.js")
+    return FileResponse("public/panel.js")
 
 
 @app.get("/icon.svg")
 async def extension_icon():
     """Extension icon"""
     from fastapi.responses import FileResponse
-    return FileResponse("app/static/icon.svg")
+    return FileResponse("public/icon.svg")
 
 
 @app.get("/diff.html")
 async def extension_diff():
     """Extension diff viewer HTML"""
     from fastapi.responses import FileResponse
-    return FileResponse("app/static/diff.html")
+    return FileResponse("public/diff.html")
 
 
 @app.get("/diff.js")
 async def extension_diff_js():
     """Extension diff viewer JavaScript"""
     from fastapi.responses import FileResponse
-    return FileResponse("app/static/diff.js")
+    return FileResponse("public/diff.js")
 
 
 # ============================================================================
