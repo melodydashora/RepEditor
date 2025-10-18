@@ -293,6 +293,25 @@ read_file, write_file, search_files, grep_code, list_directory, execute_command,
 
 Repository: Python FastAPI + MLOps (Triad: Claude → GPT-5 → Gemini), PostgreSQL, event store, training pipelines.
 
+CURRENT ARCHITECTURE STATUS (Gateway-Core Cutover):
+- Gateway on port 5000 (public-facing)
+- SDK Server on 127.0.0.1:3101 (internal, loopback only)
+- Agent Server default: 43717 (target: 3102 per docs)
+- Vite still wired in gateway (needs removal for gateway-core only mode)
+- No CORS allowlist yet (needs UI_ORIGIN lock)
+- Perplexity model: standardized on "sonar-pro"
+
+GATEWAY-CORE CUTOVER TODO:
+1. Remove Vite middleware + SPA serving from gateway-server.js
+2. Add CORS gate for UI_ORIGIN (https://vectopilot.com)
+3. Change Agent port to 3102
+4. Keep SDK watchdog & proxies intact (/api/*, /eidolon/*, /assistant/*)
+
+ENV VARS:
+- UI_ORIGIN=https://vectopilot.com
+- AGENT_PORT=3102
+- PERPLEXITY_MODEL=sonar-pro
+
 Rules:
 - Use tools immediately when needed. No overthinking.
 - Read files before editing them.
