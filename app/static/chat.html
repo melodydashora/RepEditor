@@ -234,8 +234,11 @@
                     <select id="modelSelect" onchange="onModelChange()" style="display: none;">
                         <option value="">Select Model</option>
                     </select>
-                    <select id="paramsSelect" style="display: none;">
-                        <option value="">Select Parameters</option>
+                    <select id="paramNameSelect" onchange="onParamNameChange()" style="display: none;">
+                        <option value="">Select Parameter</option>
+                    </select>
+                    <select id="paramValueSelect" onchange="onParamValueChange()" style="display: none;">
+                        <option value="">Select Value</option>
                     </select>
                 </div>
             </div>
@@ -329,118 +332,101 @@
             }
         }
 
-        // Handle model selection
+        // Handle model selection - show parameter names
         function onModelChange() {
             const modelSelect = document.getElementById('modelSelect');
-            const paramsSelect = document.getElementById('paramsSelect');
+            const paramNameSelect = document.getElementById('paramNameSelect');
+            const paramValueSelect = document.getElementById('paramValueSelect');
             
             currentModel = modelSelect.value;
             
             if (!currentModel) {
-                paramsSelect.style.display = 'none';
+                paramNameSelect.style.display = 'none';
+                paramValueSelect.style.display = 'none';
                 return;
             }
             
-            // Show parameters dropdown based on provider
-            paramsSelect.style.display = 'inline-block';
-            paramsSelect.innerHTML = '<option value="">Select Parameters</option>';
+            // Show parameter name dropdown
+            paramNameSelect.style.display = 'inline-block';
+            paramValueSelect.style.display = 'none';
+            paramNameSelect.innerHTML = '<option value="">Select Parameter</option>';
             
             if (currentProvider === 'openai') {
-                // Model-specific parameters based on model ID
-                let params = [];
+                let paramOptions = [];
                 
-                // O1/O3 models (reasoning models)
+                // O1/O3 models
                 if (currentModel.startsWith('o1-') || currentModel.startsWith('o3-')) {
-                    params = [
-                        { value: 'max_completion_tokens:1000', label: 'Max Tokens: 1000' },
-                        { value: 'max_completion_tokens:4000', label: 'Max Tokens: 4000' },
-                        { value: 'max_completion_tokens:8000', label: 'Max Tokens: 8000' },
-                        { value: 'max_completion_tokens:16000', label: 'Max Tokens: 16000' }
-                    ];
+                    paramOptions = ['max_completion_tokens'];
                 }
-                // GPT-5 models (support reasoning_effort + verbosity)
-                else if (currentModel.startsWith('gpt-5')) {
-                    params = [
-                        { value: 'reasoning_effort:minimal', label: 'Reasoning: Minimal' },
-                        { value: 'reasoning_effort:low', label: 'Reasoning: Low' },
-                        { value: 'reasoning_effort:medium', label: 'Reasoning: Medium' },
-                        { value: 'reasoning_effort:high', label: 'Reasoning: High' },
-                        { value: 'verbosity:low', label: 'Verbosity: Low' },
-                        { value: 'verbosity:medium', label: 'Verbosity: Medium' },
-                        { value: 'verbosity:high', label: 'Verbosity: High' },
-                        { value: 'max_completion_tokens:4000', label: 'Max Tokens: 4000' },
-                        { value: 'max_completion_tokens:8000', label: 'Max Tokens: 8000' },
-                        { value: 'max_completion_tokens:16000', label: 'Max Tokens: 16000' }
-                    ];
+                // GPT-5 models (NOT codex/audio/realtime/image)
+                else if (currentModel.startsWith('gpt-5') && !currentModel.includes('codex') && 
+                         !currentModel.includes('audio') && !currentModel.includes('realtime') && 
+                         !currentModel.includes('image') && !currentModel.includes('search')) {
+                    paramOptions = ['reasoning_effort', 'verbosity', 'max_completion_tokens'];
                 }
                 // GPT-4o/4.1 models
                 else if (currentModel.startsWith('gpt-4o') || currentModel.startsWith('gpt-4.1')) {
-                    params = [
-                        { value: 'temperature:0.7', label: 'Temperature: 0.7 (balanced)' },
-                        { value: 'temperature:1.0', label: 'Temperature: 1.0 (creative)' },
-                        { value: 'temperature:0.3', label: 'Temperature: 0.3 (focused)' },
-                        { value: 'max_tokens:4000', label: 'Max Tokens: 4000' },
-                        { value: 'max_tokens:8000', label: 'Max Tokens: 8000' },
-                        { value: 'max_tokens:16000', label: 'Max Tokens: 16000' }
-                    ];
+                    paramOptions = ['temperature', 'max_tokens'];
                 }
-                // GPT-3.5/4 (legacy models)
+                // GPT-3.5/4 (legacy)
                 else {
-                    params = [
-                        { value: 'temperature:0.7', label: 'Temperature: 0.7' },
-                        { value: 'temperature:1.0', label: 'Temperature: 1.0' },
-                        { value: 'max_tokens:2000', label: 'Max Tokens: 2000' },
-                        { value: 'max_tokens:4000', label: 'Max Tokens: 4000' }
-                    ];
+                    paramOptions = ['temperature', 'max_tokens'];
                 }
                 
-                params.forEach(param => {
+                paramOptions.forEach(param => {
                     const option = document.createElement('option');
-                    option.value = param.value;
-                    option.textContent = param.label;
-                    paramsSelect.appendChild(option);
+                    option.value = param;
+                    option.textContent = param.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase());
+                    paramNameSelect.appendChild(option);
                 });
-                
-                // Add multiple selection support
-                paramsSelect.onchange = function() {
-                    const [key, value] = this.value.split(':');
-                    currentParams[key] = value;
-                };
-            } else if (currentProvider === 'anthropic') {
-                const params = [
-                    { value: 'thinking:enabled', label: 'Extended Thinking: Enabled' },
-                    { value: 'max_tokens:4096', label: 'Max Tokens: 4096' },
-                    { value: 'max_tokens:8192', label: 'Max Tokens: 8192' }
-                ];
-                
-                params.forEach(param => {
-                    const option = document.createElement('option');
-                    option.value = param.value;
-                    option.textContent = param.label;
-                    paramsSelect.appendChild(option);
-                });
-                
-                paramsSelect.onchange = function() {
-                    const [key, value] = this.value.split(':');
-                    currentParams[key] = value;
-                };
-            } else if (currentProvider === 'gemini') {
-                const params = [
-                    { value: 'thinking:adaptive', label: 'Thinking Mode: Adaptive' },
-                    { value: 'max_tokens:8192', label: 'Max Tokens: 8192' }
-                ];
-                
-                params.forEach(param => {
-                    const option = document.createElement('option');
-                    option.value = param.value;
-                    option.textContent = param.label;
-                    paramsSelect.appendChild(option);
-                });
-                
-                paramsSelect.onchange = function() {
-                    const [key, value] = this.value.split(':');
-                    currentParams[key] = value;
-                };
+            }
+        }
+        
+        // Handle parameter name selection - show parameter values
+        function onParamNameChange() {
+            const paramNameSelect = document.getElementById('paramNameSelect');
+            const paramValueSelect = document.getElementById('paramValueSelect');
+            
+            const paramName = paramNameSelect.value;
+            
+            if (!paramName) {
+                paramValueSelect.style.display = 'none';
+                return;
+            }
+            
+            paramValueSelect.style.display = 'inline-block';
+            paramValueSelect.innerHTML = '<option value="">Select Value</option>';
+            
+            let values = [];
+            
+            if (paramName === 'reasoning_effort') {
+                values = ['minimal', 'low', 'medium', 'high'];
+            } else if (paramName === 'verbosity') {
+                values = ['low', 'medium', 'high'];
+            } else if (paramName === 'temperature') {
+                values = ['0.3', '0.5', '0.7', '1.0', '1.5'];
+            } else if (paramName === 'max_tokens' || paramName === 'max_completion_tokens') {
+                values = ['1000', '2000', '4000', '8000', '16000', '32000'];
+            }
+            
+            values.forEach(value => {
+                const option = document.createElement('option');
+                option.value = value;
+                option.textContent = value;
+                paramValueSelect.appendChild(option);
+            });
+        }
+        
+        // Handle parameter value selection
+        function onParamValueChange() {
+            const paramNameSelect = document.getElementById('paramNameSelect');
+            const paramValueSelect = document.getElementById('paramValueSelect');
+            
+            const paramName = paramNameSelect.value;
+            const paramValue = paramValueSelect.value;
+            
+            if (paramName && paramValue) {
+                currentParams[paramName] = paramValue;
             }
         }
 
