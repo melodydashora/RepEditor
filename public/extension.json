@@ -35,5 +35,6 @@
     { "name": "repldb:read", "reason": "Load cached plans/diffs for this App" },
     { "name": "repldb:write", "reason": "Store cached plans/diffs and settings" },
     { "name": "experimental-api", "reason": "Use experimental fs/process APIs from the pane" }
-  ]
+  ],
+  "background": { "page": "/background.html" }
 }

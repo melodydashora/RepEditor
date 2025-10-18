@@ -321,6 +321,13 @@ async def extension_logs():
     return FileResponse("public/logs.html")
 
 
+@app.get("/background.html")
+async def extension_background():
+    """Extension background service HTML"""
+    from fastapi.responses import FileResponse
+    return FileResponse("public/background.html")
+
+
 # ============================================================================
 # API ROUTES
 # ============================================================================

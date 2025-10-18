@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPT Repository Access - Background Service</title>
+</head>
+<body>
+    <script>
+        // Background service for always-on connections and webhooks
+        console.log('[GPT Extension] Background service started');
+        
+        // Keep-alive for SSE/WebSocket connections
+        let keepAliveInterval;
+        let eventSource;
+        
+        // Initialize background services
+        async function initializeBackgroundServices() {
+            console.log('[Background] Initializing services...');
+            
+            // Set up keep-alive ping
+            keepAliveInterval = setInterval(() => {
+                console.log('[Background] Keep-alive ping');
+                // Could ping your server here to maintain connection
+            }, 30000); // Every 30 seconds
+            
+            // Optional: Set up SSE connection for real-time updates
+            // Uncomment if you need server-sent events
+            /*
+            try {
+                eventSource = new EventSource('/api/sse/updates');
+                
+                eventSource.onmessage = (event) => {
+                    console.log('[Background] SSE message:', event.data);
+                    // Handle real-time updates from server
+                    handleServerUpdate(JSON.parse(event.data));
+                };
+                
+                eventSource.onerror = (error) => {
+                    console.error('[Background] SSE error:', error);
+                    // Reconnect after error
+                    setTimeout(initializeBackgroundServices, 5000);
+                };
+            } catch (error) {
+                console.error('[Background] Failed to establish SSE:', error);
+            }
+            */
+            
+            // Listen for messages from other extension pages
+            window.addEventListener('message', handleMessage);
+        }
+        
+        // Handle messages from panel/diff viewer
+        function handleMessage(event) {
+            if (event.origin !== window.location.origin) return;
+            
+            const { type, data } = event.data || {};
+            
+            switch(type) {
+                case 'webhook':
+                    handleWebhook(data);
+                    break;
+                case 'cache-update':
+                    updateCache(data);
+                    break;
+                case 'job-status':
+                    checkJobStatus(data);
+                    break;
+                default:
+                    console.log('[Background] Unknown message type:', type);
+            }
+        }
+        
+        // Handle webhook notifications
+        async function handleWebhook(data) {
+            console.log('[Background] Processing webhook:', data);
+            // Process webhook and notify other pages if needed
+            broadcastToExtension('webhook-received', data);
+        }
+        
+        // Update local cache
+        async function updateCache(data) {
+            console.log('[Background] Updating cache:', data);
+            try {
+                // Store in ReplDB if available
+                if (window.replit?.db) {
+                    await window.replit.db.set(data.key, data.value);
+                } else {
+                    // Fallback to localStorage
+                    localStorage.setItem(data.key, JSON.stringify(data.value));
+                }
+            } catch (error) {
+                console.error('[Background] Cache update failed:', error);
+            }
+        }
+        
+        // Check job status periodically
+        async function checkJobStatus(jobId) {
+            console.log('[Background] Checking job status:', jobId);
+            try {
+                const response = await fetch(`/api/jobs/${jobId}/status`);
+                const status = await response.json();
+                broadcastToExtension('job-status-update', status);
+            } catch (error) {
+                console.error('[Background] Job status check failed:', error);
+            }
+        }
+        
+        // Handle server updates
+        function handleServerUpdate(update) {
+            console.log('[Background] Server update received:', update);
+            // Broadcast to all extension pages
+            broadcastToExtension('server-update', update);
+        }
+        
+        // Broadcast message to all extension pages
+        function broadcastToExtension(type, data) {
+            // Send to all open extension pages
+            const message = { type, data, source: 'background' };
+            
+            // Try to communicate with panel
+            try {
+                if (window.parent !== window) {
+                    window.parent.postMessage(message, '*');
+                }
+            } catch (e) {
+                console.log('[Background] Could not post to parent');
+            }
+        }
+        
+        // Clean up on unload
+        window.addEventListener('beforeunload', () => {
+            console.log('[Background] Cleaning up...');
+            if (keepAliveInterval) {
+                clearInterval(keepAliveInterval);
+            }
+            if (eventSource) {
+                eventSource.close();
+            }
+        });
+        
+        // Initialize on load
+        initializeBackgroundServices();
+        
+        // Expose API for debugging
+        window.gptBackground = {
+            sendMessage: broadcastToExtension,
+            updateCache,
+            checkJobStatus,
+            status: () => ({
+                running: true,
+                started: new Date().toISOString(),
+                services: {
+                    keepAlive: !!keepAliveInterval,
+                    sse: !!eventSource
+                }
+            })
+        };
+        
+        console.log('[GPT Extension] Background service ready. Use window.gptBackground.status() to check status.');
+    </script>
+</body>
+</html>
