@@ -708,14 +708,14 @@ Act directly. Use tools, don't describe using them."""
                 raise HTTPException(status_code=500, detail="API key not configured")
             
             # Build request body for /v1/responses
+            # Note: Codex and other /v1/responses models have minimal parameter support
             request_body = {
                 "model": model,
                 "input": request.message,  # Simplified input format
             }
             
-            # Add parameters if present (note: /v1/responses has different params than chat)
-            if "temperature" in params:
-                request_body["temperature"] = float(params["temperature"])
+            # Most /v1/responses models don't support parameters like temperature
+            # Skip parameter handling for these specialized models
             
             # Call OpenAI /v1/responses endpoint directly
             try:
