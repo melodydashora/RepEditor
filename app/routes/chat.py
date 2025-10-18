@@ -128,6 +128,117 @@ def get_repo_structure() -> str:
         return f"Error: {str(e)}"
 
 
+def git_status() -> str:
+    """Get git repository status"""
+    try:
+        result = subprocess.run(
+            ["git", "status", "--short"],
+            capture_output=True,
+            text=True,
+            timeout=5
+        )
+        return f"Git status:\n\n{result.stdout if result.stdout else 'Working tree clean'}"
+    except Exception as e:
+        return f"Error: {str(e)}"
+
+
+def git_diff(file_path: str = "") -> str:
+    """Show git diff for file or all files"""
+    try:
+        cmd = ["git", "diff", file_path] if file_path else ["git", "diff"]
+        result = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            timeout=10
+        )
+        return f"Git diff:\n\n{result.stdout if result.stdout else 'No changes'}"
+    except Exception as e:
+        return f"Error: {str(e)}"
+
+
+def web_search(query: str) -> str:
+    """Search the web using Perplexity API"""
+    try:
+        import aiohttp
+        import asyncio
+        
+        async def search():
+            headers = {
+                "Authorization": f"Bearer {settings.PERPLEXITY_API_KEY}",
+                "Content-Type": "application/json"
+            }
+            data = {
+                "model": "sonar-pro",
+                "messages": [{"role": "user", "content": query}]
+            }
+            async with aiohttp.ClientSession() as session:
+                async with session.post(
+                    "https://api.perplexity.ai/chat/completions",
+                    headers=headers,
+                    json=data,
+                    timeout=aiohttp.ClientTimeout(total=30)
+                ) as resp:
+                    result = await resp.json()
+                    return result.get("choices", [{}])[0].get("message", {}).get("content", "No results")
+        
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        result = loop.run_until_complete(search())
+        loop.close()
+        return f"Web search results:\n\n{result}"
+    except Exception as e:
+        return f"Web search unavailable: {str(e)}"
+
+
+def get_memory(key: str) -> str:
+    """Read from persistent memory storage"""
+    try:
+        memory_file = f"data/memory/{key}.latest.json"
+        if os.path.exists(memory_file):
+            with open(memory_file, 'r') as f:
+                data = json.load(f)
+                return f"Memory '{key}':\n\n{json.dumps(data.get('data', {}), indent=2)}"
+        return f"No memory found for key: {key}"
+    except Exception as e:
+        return f"Error reading memory: {str(e)}"
+
+
+def write_memory(key: str, data: str) -> str:
+    """Write to persistent memory storage"""
+    try:
+        os.makedirs("data/memory", exist_ok=True)
+        from datetime import datetime
+        
+        ts = datetime.now().isoformat().replace(':', '-').replace('.', '-')
+        
+        # Parse data as JSON if possible
+        try:
+            parsed_data = json.loads(data)
+        except:
+            parsed_data = data
+        
+        payload = {
+            "version": ts,
+            "createdAt": datetime.now().isoformat(),
+            "data": parsed_data
+        }
+        
+        # Write versioned file
+        versioned_file = f"data/memory/{key}.{ts}.json"
+        with open(versioned_file, 'w') as f:
+            json.dump(payload, f, indent=2)
+        
+        # Write latest file
+        latest_file = f"data/memory/{key}.latest.json"
+        with open(latest_file, 'w') as f:
+            json.dump(payload, f, indent=2)
+        
+        return f"✅ Memory '{key}' saved (version: {ts})"
+    except Exception as e:
+        return f"Error writing memory: {str(e)}"
+
+
 # Tool definitions for GPT-5
 TOOLS = [
     {
@@ -255,6 +366,90 @@ TOOLS = [
                 "required": []
             }
         }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "git_status",
+            "description": "Get git repository status (modified/staged files)",
+            "parameters": {
+                "type": "object",
+                "properties": {},
+                "required": []
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "git_diff",
+            "description": "Show git diff for a file or all files",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "file_path": {
+                        "type": "string",
+                        "description": "Optional file path to diff (empty for all files)"
+                    }
+                },
+                "required": []
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "web_search",
+            "description": "Search the web using Perplexity API for real-time information",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "Search query"
+                    }
+                },
+                "required": ["query"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_memory",
+            "description": "Read from persistent memory storage (data/memory/)",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string",
+                        "description": "Memory key to retrieve"
+                    }
+                },
+                "required": ["key"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "write_memory",
+            "description": "Write to persistent memory storage with versioning",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string",
+                        "description": "Memory key to store"
+                    },
+                    "data": {
+                        "type": "string",
+                        "description": "Data to store (JSON string or plain text)"
+                    }
+                },
+                "required": ["key", "data"]
+            }
+        }
     }
 ]
 
@@ -267,7 +462,12 @@ FUNCTION_MAP = {
     "search_files": search_files,
     "grep_code": grep_code,
     "execute_command": execute_command,
-    "get_repo_structure": get_repo_structure
+    "get_repo_structure": get_repo_structure,
+    "git_status": git_status,
+    "git_diff": git_diff,
+    "web_search": web_search,
+    "get_memory": get_memory,
+    "write_memory": write_memory
 }
 
 
@@ -293,8 +493,22 @@ You ARE the Vecto Pilot AI Assistant. Agent/Eidolon/Assistant are all the same t
 You are an autonomous AI builder with merged capabilities: file access, memory, context awareness, code generation.
 Your purpose: Build and maintain the Vecto Pilot rideshare driver assistance application.
 
-=== YOUR TOOLS ===
-read_file, write_file, search_files, grep_code, list_directory, execute_command, get_repo_structure
+=== UNIFIED SDK CAPABILITIES (ALL TOOLS) ===
+
+File System:
+- read_file, write_file, list_directory, search_files, grep_code, get_repo_structure
+
+Git Operations:
+- git_status, git_diff (read-only for safety)
+
+Web Search:
+- web_search (Perplexity sonar-pro for real-time information)
+
+Memory System:
+- get_memory, write_memory (persistent JSON storage in data/memory/ with versioning)
+
+Shell Commands:
+- execute_command (safe whitelist: ls, grep, cat, head, tail, wc, tree, pwd, python, pip)
 
 === REPOSITORY STRUCTURE ===
 
