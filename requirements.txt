@@ -18,3 +18,4 @@ passlib
 python-jose
 authlib
 itsdangerous
+psycopg2-binary
