@@ -19,6 +19,9 @@ class ChatRequest(BaseModel):
     """Chat message request"""
     message: str
     conversation_history: Optional[List[Dict[str, Any]]] = []
+    provider: Optional[str] = None  # openai, anthropic, gemini
+    model: Optional[str] = None  # Model ID from provider
+    params: Optional[Dict[str, Any]] = {}  # Model-specific parameters
 
 
 class ChatResponse(BaseModel):
@@ -684,16 +687,34 @@ Act directly. Use tools, don't describe using them."""
         messages.extend(request.conversation_history)
         messages.append({"role": "user", "content": request.message})
         
-        # Initial GPT-5 call with tools
-        reasoning_effort = settings.OPENAI_REASONING_EFFORT if hasattr(settings, 'OPENAI_REASONING_EFFORT') else "medium"
-        response = await client.chat.completions.create(
-            model="gpt-5",
-            messages=messages,
-            tools=TOOLS,
-            tool_choice="auto",
-            max_completion_tokens=4000,
-            reasoning_effort=reasoning_effort
-        )
+        # Determine model and parameters from request or use defaults
+        model = request.model or "gpt-5"
+        params = request.params or {}
+        
+        # Extract parameters
+        reasoning_effort = params.get("reasoning_effort", 
+            settings.OPENAI_REASONING_EFFORT if hasattr(settings, 'OPENAI_REASONING_EFFORT') else "medium")
+        max_tokens = int(params.get("max_tokens", 4000))
+        verbosity = params.get("verbosity")  # low/medium/high
+        
+        # Build request kwargs
+        request_kwargs = {
+            "model": model,
+            "messages": messages,
+            "tools": TOOLS,
+            "tool_choice": "auto",
+            "max_completion_tokens": max_tokens,
+        }
+        
+        # Add OpenAI-specific parameters
+        if request.provider == "openai" or not request.provider:
+            if reasoning_effort:
+                request_kwargs["reasoning_effort"] = reasoning_effort
+            if verbosity:
+                request_kwargs["verbosity"] = verbosity
+        
+        # Initial call with tools
+        response = await client.chat.completions.create(**request_kwargs)
         
         response_message = response.choices[0].message
         tool_calls_made = []
@@ -727,14 +748,22 @@ Act directly. Use tools, don't describe using them."""
                     })
             
             # Get response after tool execution (may trigger more tools)
-            response = await client.chat.completions.create(
-                model="gpt-5",
-                messages=messages,
-                tools=TOOLS if iteration < max_iterations - 1 else None,  # No tools on last iteration
-                tool_choice="auto" if iteration < max_iterations - 1 else None,
-                max_completion_tokens=4000,
-                reasoning_effort=reasoning_effort
-            )
+            request_kwargs = {
+                "model": model,
+                "messages": messages,
+                "tools": TOOLS if iteration < max_iterations - 1 else None,
+                "tool_choice": "auto" if iteration < max_iterations - 1 else None,
+                "max_completion_tokens": max_tokens,
+            }
+            
+            # Add OpenAI-specific parameters
+            if request.provider == "openai" or not request.provider:
+                if reasoning_effort:
+                    request_kwargs["reasoning_effort"] = reasoning_effort
+                if verbosity:
+                    request_kwargs["verbosity"] = verbosity
+            
+            response = await client.chat.completions.create(**request_kwargs)
             response_message = response.choices[0].message
         
         final_content = response_message.content if response_message.content else "Task completed."
