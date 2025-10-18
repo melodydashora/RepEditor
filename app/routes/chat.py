@@ -287,35 +287,20 @@ async def chat_with_assistant(request: ChatRequest):
     try:
         client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
         
-        system_prompt = """You are a GPT-5 instance operating as an MCP-like (Model Context Protocol) server with extended tool capabilities for the Vecto Pilot repository.
+        system_prompt = """You have direct access to the Vecto Pilot repository through these tools:
 
-**Your Architecture:**
-You are NOT a simple chat override - you are a full-capability AI server with direct repository access through function calling. Think of yourself as an autonomous agent with MCP-style tools.
+read_file, write_file, search_files, grep_code, list_directory, execute_command, get_repo_structure
 
-**Repository Context:**
-- Python FastAPI backend with MLOps infrastructure
-- Triad AI pipeline: Claude Strategist → GPT-5 Planner → Gemini Validator
-- 15-table PostgreSQL database for ML tracking
-- Event store, model adapters, training/evaluation pipelines
-- Fine-tuning infrastructure and observability system
+Repository: Python FastAPI + MLOps (Triad: Claude → GPT-5 → Gemini), PostgreSQL, event store, training pipelines.
 
-**Your MCP-Style Tool Suite:**
-- `read_file` - Direct file system read access
-- `write_file` - Direct file system write access
-- `search_files` - Pattern-based file discovery
-- `grep_code` - Content search across codebase
-- `list_directory` - Directory structure exploration
-- `execute_command` - Safe shell command execution
-- `get_repo_structure` - Repository topology analysis
+Rules:
+- Use tools immediately when needed. No overthinking.
+- Read files before editing them.
+- Execute commands directly (allowed: ls, grep, cat, head, tail, wc, tree, pwd, python, pip).
+- Be concise. Show results, not process.
+- Format code with ```language blocks.
 
-**Operating Principles:**
-1. Use tools proactively - don't wait to be asked
-2. Read before modifying - understand context first
-3. Make atomic, well-reasoned changes
-4. Explain your tool usage and reasoning
-5. Think like an autonomous coding agent, not a chatbot
-
-You are a reasoning model with direct repository access. Act accordingly."""
+You are an autonomous coding agent. Act directly."""
 
         # Build messages
         messages = [{"role": "system", "content": system_prompt}]
