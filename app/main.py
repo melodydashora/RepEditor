@@ -279,6 +279,27 @@ async def extension_manifest():
     return FileResponse("app/static/extension.json")
 
 
+@app.get("/panel.html")
+async def extension_panel():
+    """Extension panel HTML"""
+    from fastapi.responses import FileResponse
+    return FileResponse("app/static/panel.html")
+
+
+@app.get("/panel.js")
+async def extension_panel_js():
+    """Extension panel JavaScript"""
+    from fastapi.responses import FileResponse
+    return FileResponse("app/static/panel.js")
+
+
+@app.get("/icon.svg")
+async def extension_icon():
+    """Extension icon"""
+    from fastapi.responses import FileResponse
+    return FileResponse("app/static/icon.svg")
+
+
 # ============================================================================
 # API ROUTES
 # ============================================================================

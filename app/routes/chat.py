@@ -251,6 +251,168 @@ def write_memory(key: str, data: str) -> str:
         return f"Error writing memory: {str(e)}"
 
 
+# Advanced database operations (Eidolon/Agent power)
+def sql_query(query: str) -> str:
+    """Execute SQL SELECT query against PostgreSQL database"""
+    try:
+        import psycopg2
+        conn = psycopg2.connect(settings.DATABASE_URL)
+        cur = conn.cursor()
+        cur.execute(query)
+        rows = cur.fetchall()
+        columns = [desc[0] for desc in cur.description] if cur.description else []
+        cur.close()
+        conn.close()
+        
+        result = f"Query results ({len(rows)} rows):\n\nColumns: {', '.join(columns)}\n\n"
+        for row in rows[:50]:  # Limit to 50 rows
+            result += str(row) + "\n"
+        if len(rows) > 50:
+            result += f"\n... and {len(rows) - 50} more rows"
+        return result
+    except Exception as e:
+        return f"SQL query error: {str(e)}"
+
+
+def sql_execute(statement: str) -> str:
+    """Execute SQL INSERT/UPDATE/DELETE statement"""
+    try:
+        import psycopg2
+        conn = psycopg2.connect(settings.DATABASE_URL)
+        cur = conn.cursor()
+        cur.execute(statement)
+        conn.commit()
+        affected = cur.rowcount
+        cur.close()
+        conn.close()
+        return f"✅ SQL executed successfully. {affected} rows affected."
+    except Exception as e:
+        return f"SQL execute error: {str(e)}"
+
+
+def get_database_schema(table_name: str = None) -> str:
+    """Get database schema information"""
+    try:
+        import psycopg2
+        conn = psycopg2.connect(settings.DATABASE_URL)
+        cur = conn.cursor()
+        
+        if table_name:
+            query = """
+                SELECT column_name, data_type, is_nullable, column_default
+                FROM information_schema.columns
+                WHERE table_name = %s
+                ORDER BY ordinal_position
+            """
+            cur.execute(query, (table_name,))
+        else:
+            query = """
+                SELECT table_name 
+                FROM information_schema.tables 
+                WHERE table_schema = 'public'
+                ORDER BY table_name
+            """
+            cur.execute(query)
+        
+        rows = cur.fetchall()
+        cur.close()
+        conn.close()
+        
+        result = f"Database schema{' for table: ' + table_name if table_name else ''}:\n\n"
+        for row in rows:
+            result += str(row) + "\n"
+        return result
+    except Exception as e:
+        return f"Schema query error: {str(e)}"
+
+
+def git_commit(message: str, files: str = ".") -> str:
+    """Commit changes to git repository"""
+    try:
+        # Add files
+        result = subprocess.run(
+            ["git", "add", files],
+            capture_output=True,
+            text=True,
+            timeout=10
+        )
+        
+        # Commit
+        result = subprocess.run(
+            ["git", "commit", "-m", message],
+            capture_output=True,
+            text=True,
+            timeout=10
+        )
+        
+        if result.returncode == 0:
+            return f"✅ Committed: {message}\n\n{result.stdout}"
+        else:
+            return f"Commit result:\n{result.stdout}\n{result.stderr}"
+    except Exception as e:
+        return f"Git commit error: {str(e)}"
+
+
+def git_push(branch: str = "main") -> str:
+    """Push changes to remote repository"""
+    try:
+        result = subprocess.run(
+            ["git", "push", "origin", branch],
+            capture_output=True,
+            text=True,
+            timeout=30
+        )
+        
+        if result.returncode == 0:
+            return f"✅ Pushed to {branch}\n\n{result.stdout}"
+        else:
+            return f"Push result:\n{result.stdout}\n{result.stderr}"
+    except Exception as e:
+        return f"Git push error: {str(e)}"
+
+
+def analyze_workspace() -> str:
+    """Analyze workspace structure and dependencies"""
+    try:
+        analysis = {
+            "timestamp": str(subprocess.run(["date"], capture_output=True, text=True, timeout=5).stdout.strip()),
+            "cwd": os.getcwd(),
+            "files": {},
+            "dependencies": {}
+        }
+        
+        # Count files by type
+        for ext in [".py", ".js", ".ts", ".tsx", ".html", ".css", ".json"]:
+            result = subprocess.run(
+                ["find", ".", "-name", f"*{ext}", "-type", "f"],
+                capture_output=True,
+                text=True,
+                timeout=10
+            )
+            count = len([l for l in result.stdout.split("\n") if l.strip()])
+            if count > 0:
+                analysis["files"][ext] = count
+        
+        # Check for package files
+        for pkg_file in ["package.json", "requirements.txt", "Cargo.toml", "go.mod"]:
+            if os.path.exists(pkg_file):
+                analysis["dependencies"][pkg_file] = "present"
+        
+        result = f"Workspace Analysis:\n\n"
+        result += f"Location: {analysis['cwd']}\n"
+        result += f"Time: {analysis['timestamp']}\n\n"
+        result += "File counts:\n"
+        for ext, count in analysis["files"].items():
+            result += f"  {ext}: {count} files\n"
+        result += "\nDependency files:\n"
+        for pkg, status in analysis["dependencies"].items():
+            result += f"  {pkg}: {status}\n"
+        
+        return result
+    except Exception as e:
+        return f"Workspace analysis error: {str(e)}"
+
+
 # Tool definitions for GPT-5
 TOOLS = [
     {
@@ -462,6 +624,107 @@ TOOLS = [
                 "required": ["key", "data"]
             }
         }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "sql_query",
+            "description": "Execute SQL SELECT query against PostgreSQL database",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "SQL SELECT query to execute"
+                    }
+                },
+                "required": ["query"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "sql_execute",
+            "description": "Execute SQL INSERT/UPDATE/DELETE statement",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "statement": {
+                        "type": "string",
+                        "description": "SQL DML statement to execute"
+                    }
+                },
+                "required": ["statement"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_database_schema",
+            "description": "Get database schema information (tables and columns)",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "table_name": {
+                        "type": "string",
+                        "description": "Optional: specific table name to get schema for"
+                    }
+                },
+                "required": []
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "git_commit",
+            "description": "Commit changes to git repository",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "description": "Commit message"
+                    },
+                    "files": {
+                        "type": "string",
+                        "description": "Files to add (default: '.' for all changes)"
+                    }
+                },
+                "required": ["message"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "git_push",
+            "description": "Push changes to remote repository",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "branch": {
+                        "type": "string",
+                        "description": "Branch name to push (default: 'main')"
+                    }
+                },
+                "required": []
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "analyze_workspace",
+            "description": "Analyze workspace structure, file counts, and dependencies",
+            "parameters": {
+                "type": "object",
+                "properties": {},
+                "required": []
+            }
+        }
     }
 ]
 
@@ -479,7 +742,13 @@ FUNCTION_MAP = {
     "git_diff": git_diff,
     "web_search": web_search,
     "get_memory": get_memory,
-    "write_memory": write_memory
+    "write_memory": write_memory,
+    "sql_query": sql_query,
+    "sql_execute": sql_execute,
+    "get_database_schema": get_database_schema,
+    "git_commit": git_commit,
+    "git_push": git_push,
+    "analyze_workspace": analyze_workspace
 }
 
 

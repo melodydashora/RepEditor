@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>GPT Repository Access</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    html,body,#root{height:100%;margin:0;background:#0b1220;color:#e2e8f0;font:14px system-ui}
+    .top{display:flex;gap:8px;align-items:center;padding:8px;border-bottom:1px solid #24314f;background:#0f172a}
+    iframe{border:0;width:100%;height:calc(100% - 44px)}
+    .pill{padding:2px 8px;border:1px solid #28365a;border-radius:999px;opacity:.85;font-size:11px}
+    .btn{padding:6px 10px;border-radius:8px;background:#1d2951;border:1px solid #27355b;color:#e2e8f0;cursor:pointer;font-size:12px}
+    .btn:hover{background:#27355b}
+    .status{color:#10b981;font-weight:600}
+  </style>
+</head>
+<body>
+  <div class="top">
+    <strong>GPT-5 🤖</strong>
+    <span id="ctx" class="pill status">GPT-5 Ready</span>
+    <button id="open" class="btn">↗ Full App</button>
+  </div>
+  <iframe id="app" src="about:blank" allow="clipboard-read *; clipboard-write *"></iframe>
+  <script type="module" src="./panel.js"></script>
+</body>
+</html>

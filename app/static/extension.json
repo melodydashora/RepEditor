@@ -1,0 +1,27 @@
+{
+  "id": "gpt-repo-access",
+  "name": "GPT Repository Access",
+  "version": "0.1.0",
+  "description": "Direct GPT-5 access with full repository control — read files, edit code, run commands.",
+  "permissions": [
+    "read",
+    "write-exec",
+    "repldb:read",
+    "repldb:write",
+    "experimental-api",
+    "network"
+  ],
+  "panels": [
+    {
+      "id": "main",
+      "title": "GPT Repository Access",
+      "icon": "icon.svg",
+      "html": "panel.html",
+      "location": "right",
+      "width": 420
+    }
+  ],
+  "commands": [
+    { "id": "open", "title": "Open GPT Repository Access", "panel": "main" }
+  ]
+}

@@ -89,10 +89,14 @@ Required secrets:
   - `/api/ssh/repls` - List available Replit apps
   - `/api/ssh/browse` - Browse files in remote Repls
   - `/api/ssh/read` - Read file contents from remote Repls
-- **GPT Frame Integration**: Added 🤖 GPT button to main interface header
-  - Opens dedicated GPT chat frame with full repository access
-  - Direct access to file operations, git commands, shell execution
-  - Available at `/api/chat/frame` endpoint
+- **GPT Frame Integration**: Added proper Replit Extension with workspace panel
+  - GPT-5 with full Eidolon/Agent powers
+  - Proper `extension.json`, `panel.html`, `panel.js` files
+  - Advanced database operations (sql_query, sql_execute, get_database_schema)
+  - Advanced git operations (git_commit, git_push)
+  - Workspace intelligence (analyze_workspace)
+  - All Eidolon capabilities: file I/O, shell, memory, web search, database, git
+  - Available as workspace panel after adding extension config to `.replit`
 
 ### October 18, 2025 - Evening
 - **Redesigned Configuration UI**: Converted modal popup to full-page configuration screen
