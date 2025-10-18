@@ -732,15 +732,21 @@ Act directly. Use tools, don't describe using them."""
                     
                     # Parse JSON response
                     response_text = response.text
+                    print(f"[DEBUG] Raw response text type: {type(response_text)}")
+                    print(f"[DEBUG] Raw response text (first 500 chars): {response_text[:500]}")
                     
                     # Try parsing as JSON first
                     try:
                         data = json.loads(response_text)
-                    except json.JSONDecodeError:
+                        print(f"[DEBUG] Parsed as JSON successfully, type: {type(data)}")
+                    except json.JSONDecodeError as e:
+                        print(f"[DEBUG] JSON parse failed: {e}")
                         # If JSON fails, try Python literal (single quotes)
                         try:
                             data = ast.literal_eval(response_text)
-                        except Exception:
+                            print(f"[DEBUG] Parsed as Python literal, type: {type(data)}")
+                        except Exception as e2:
+                            print(f"[DEBUG] Python literal parse failed: {e2}")
                             # If both fail, return raw text
                             return ChatResponse(response=response_text, tool_calls=None)
                     
