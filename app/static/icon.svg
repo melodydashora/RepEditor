@@ -1,4 +1,34 @@
-<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="32" height="32" rx="6" fill="#10b981"/>
-  <text x="16" y="22" font-family="system-ui" font-size="18" font-weight="bold" text-anchor="middle" fill="white">🤖</text>
+<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Gradient background -->
+  <rect width="48" height="48" rx="12" fill="url(#vecto-gradient)"/>
+  
+  <!-- Glow effect -->
+  <rect width="48" height="48" rx="12" fill="url(#glow)" opacity="0.3"/>
+  
+  <!-- Center robot emoji -->
+  <text x="24" y="32" font-family="system-ui, -apple-system" font-size="26" text-anchor="middle" fill="white">🤖</text>
+  
+  <!-- Subtle shine overlay -->
+  <rect x="2" y="2" width="44" height="20" rx="10" fill="url(#shine)" opacity="0.2"/>
+  
+  <defs>
+    <!-- Main gradient -->
+    <linearGradient id="vecto-gradient" x1="0" y1="0" x2="48" y2="48">
+      <stop offset="0%" stop-color="#667EEA"/>
+      <stop offset="50%" stop-color="#9F7AEA"/>
+      <stop offset="100%" stop-color="#ED64A6"/>
+    </linearGradient>
+    
+    <!-- Glow effect -->
+    <radialGradient id="glow" cx="24" cy="24" r="24">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    
+    <!-- Shine effect -->
+    <linearGradient id="shine" x1="0" y1="0" x2="0" y2="20">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
 </svg>
