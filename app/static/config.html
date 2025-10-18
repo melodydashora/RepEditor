@@ -442,21 +442,44 @@
             document.getElementById('perm-memory').checked = true;
         }
 
-        // Load saved token on page load
+        // Auto-restore session on page load
         window.addEventListener('DOMContentLoaded', async () => {
+            const sessionToken = localStorage.getItem('session_token');
+            if (!sessionToken) {
+                console.log('No saved session found');
+                return;
+            }
+
             try {
-                const response = await fetch('/api/config/token/current');
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.token) {
-                        document.getElementById('repo-token').value = data.token;
-                        document.getElementById('token-status').innerHTML = `
-                            <div class="info">Token loaded from saved configuration</div>
+                // Verify session and get user info
+                const userResponse = await fetch('/api/auth/me', {
+                    headers: { 'Authorization': `Bearer ${sessionToken}` }
+                });
+
+                if (userResponse.ok) {
+                    const user = await userResponse.json();
+                    console.log('✅ Session restored for user:', user.username);
+
+                    // Auto-load GitHub repos if user has GitHub token
+                    if (user.has_github_token) {
+                        document.getElementById('github-status').innerHTML = `
+                            <div class="info">✅ Authenticated as ${user.username}</div>
                         `;
+                        await loadGithubRepos(sessionToken);
                     }
+
+                    // Auto-load saved repository selection
+                    const savedRepo = localStorage.getItem('selected_repo');
+                    if (savedRepo) {
+                        document.getElementById('github-repo').value = savedRepo;
+                    }
+                } else {
+                    // Session expired
+                    localStorage.removeItem('session_token');
+                    console.log('Session expired');
                 }
             } catch (error) {
-                console.log('No saved token found');
+                console.error('Error restoring session:', error);
             }
         });
     </script>
