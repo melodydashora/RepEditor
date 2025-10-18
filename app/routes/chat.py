@@ -22,7 +22,6 @@ router = APIRouter(prefix="/api/chat", tags=["chat"])
 async def gpt_frame():
     """Serve dedicated GPT access interface"""
     return FileResponse("app/static/gpt-frame.html")
-router = APIRouter(prefix="/api/chat", tags=["chat"])
 
 
 class ChatRequest(BaseModel):
