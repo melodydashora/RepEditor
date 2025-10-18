@@ -802,7 +802,12 @@ async def get_provider_models(provider: str):
             client = AsyncOpenAI(api_key=api_key)
             models_response = await client.models.list()
             
-            # Filter to chat models only and format response
+            # Filter to chat-compatible models only (exclude codex, audio, realtime, image, search-api)
+            excluded_patterns = [
+                "codex", "audio", "realtime", "whisper", "tts", "dall-e", 
+                "embedding", "moderation", "search-api", "image"
+            ]
+            
             chat_models = [
                 {
                     "id": model.id,
@@ -810,7 +815,8 @@ async def get_provider_models(provider: str):
                     "created": model.created
                 }
                 for model in models_response.data
-                if any(prefix in model.id for prefix in ["gpt-", "o1-", "o3-", "chatgpt"])
+                if (any(prefix in model.id for prefix in ["gpt-", "o1-", "o3-", "chatgpt"]) 
+                    and not any(excluded in model.id for excluded in excluded_patterns))
             ]
             
             # Sort by most recent first
