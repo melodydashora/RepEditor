@@ -265,6 +265,13 @@ async def root():
     return FileResponse("app/static/chat.html")
 
 
+@app.get("/chat")
+async def chat_page():
+    """AI Chat Assistant page"""
+    from fastapi.responses import FileResponse
+    return FileResponse("app/static/chat.html")
+
+
 # ============================================================================
 # API ROUTES
 # ============================================================================

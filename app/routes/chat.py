@@ -695,27 +695,39 @@ Act directly. Use tools, don't describe using them."""
         model = request.model or "gpt-5"
         params = request.params or {}
         
-        # Extract parameters
-        reasoning_effort = params.get("reasoning_effort", 
-            settings.OPENAI_REASONING_EFFORT if hasattr(settings, 'OPENAI_REASONING_EFFORT') else "medium")
-        max_tokens = int(params.get("max_tokens", 4000))
-        verbosity = params.get("verbosity")  # low/medium/high
-        
-        # Build request kwargs
+        # Build request kwargs based on model type
         request_kwargs = {
             "model": model,
             "messages": messages,
             "tools": TOOLS,
             "tool_choice": "auto",
-            "max_completion_tokens": max_tokens,
         }
         
-        # Add OpenAI-specific parameters
-        if request.provider == "openai" or not request.provider:
-            if reasoning_effort:
-                request_kwargs["reasoning_effort"] = reasoning_effort
-            if verbosity:
-                request_kwargs["verbosity"] = verbosity
+        # Handle parameters based on what was selected
+        # O1/O3 models: max_completion_tokens only
+        if model.startswith('o1-') or model.startswith('o3-'):
+            max_comp_tokens = params.get("max_completion_tokens", "4000")
+            request_kwargs["max_completion_tokens"] = int(max_comp_tokens)
+        
+        # GPT-5 clean models: reasoning_effort, verbosity, max_completion_tokens
+        elif model.startswith('gpt-5') and not any(x in model for x in ['codex', 'audio', 'realtime', 'image', 'search']):
+            if "reasoning_effort" in params:
+                request_kwargs["reasoning_effort"] = params["reasoning_effort"]
+            if "verbosity" in params:
+                request_kwargs["verbosity"] = params["verbosity"]
+            max_comp_tokens = params.get("max_completion_tokens", "4000")
+            request_kwargs["max_completion_tokens"] = int(max_comp_tokens)
+        
+        # GPT-4o, GPT-4.1, GPT-5 special models: temperature, max_tokens
+        else:
+            if "temperature" in params:
+                request_kwargs["temperature"] = float(params["temperature"])
+            if "max_tokens" in params:
+                request_kwargs["max_tokens"] = int(params["max_tokens"])
+            elif "max_completion_tokens" in params:
+                request_kwargs["max_completion_tokens"] = int(params["max_completion_tokens"])
+            else:
+                request_kwargs["max_tokens"] = 4000
         
         # Initial call with tools
         response = await client.chat.completions.create(**request_kwargs)
@@ -752,22 +764,35 @@ Act directly. Use tools, don't describe using them."""
                     })
             
             # Get response after tool execution (may trigger more tools)
-            request_kwargs = {
+            follow_up_kwargs = {
                 "model": model,
                 "messages": messages,
                 "tools": TOOLS if iteration < max_iterations - 1 else None,
                 "tool_choice": "auto" if iteration < max_iterations - 1 else None,
-                "max_completion_tokens": max_tokens,
             }
             
-            # Add OpenAI-specific parameters
-            if request.provider == "openai" or not request.provider:
-                if reasoning_effort:
-                    request_kwargs["reasoning_effort"] = reasoning_effort
-                if verbosity:
-                    request_kwargs["verbosity"] = verbosity
+            # Re-apply parameters for follow-up calls
+            if model.startswith('o1-') or model.startswith('o3-'):
+                max_comp_tokens = params.get("max_completion_tokens", "4000")
+                follow_up_kwargs["max_completion_tokens"] = int(max_comp_tokens)
+            elif model.startswith('gpt-5') and not any(x in model for x in ['codex', 'audio', 'realtime', 'image', 'search']):
+                if "reasoning_effort" in params:
+                    follow_up_kwargs["reasoning_effort"] = params["reasoning_effort"]
+                if "verbosity" in params:
+                    follow_up_kwargs["verbosity"] = params["verbosity"]
+                max_comp_tokens = params.get("max_completion_tokens", "4000")
+                follow_up_kwargs["max_completion_tokens"] = int(max_comp_tokens)
+            else:
+                if "temperature" in params:
+                    follow_up_kwargs["temperature"] = float(params["temperature"])
+                if "max_tokens" in params:
+                    follow_up_kwargs["max_tokens"] = int(params["max_tokens"])
+                elif "max_completion_tokens" in params:
+                    follow_up_kwargs["max_completion_tokens"] = int(params["max_completion_tokens"])
+                else:
+                    follow_up_kwargs["max_tokens"] = 4000
             
-            response = await client.chat.completions.create(**request_kwargs)
+            response = await client.chat.completions.create(**follow_up_kwargs)
             response_message = response.choices[0].message
         
         final_content = response_message.content if response_message.content else "Task completed."

@@ -447,6 +447,13 @@
                     requestBody.provider = currentProvider;
                     requestBody.model = currentModel;
                     requestBody.params = currentParams;
+                    
+                    // Show configuration being used
+                    const configInfo = `🔧 Using: ${currentModel}`;
+                    const paramsInfo = Object.keys(currentParams).length > 0 
+                        ? ` | ${Object.entries(currentParams).map(([k,v]) => `${k}=${v}`).join(', ')}`
+                        : '';
+                    addMessage(configInfo + paramsInfo, 'system');
                 }
                 
                 // Call your backend API endpoint
@@ -472,6 +479,13 @@
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${role}-message`;
             
+            // System messages (configuration info) have lighter styling
+            if (role === 'system') {
+                messageDiv.style.opacity = '0.7';
+                messageDiv.style.fontSize = '0.9em';
+                messageDiv.style.fontStyle = 'italic';
+            }
+            
             const formattedText = text.replace(/```(\w+)?\n([\s\S]*?)```/g, (match, lang, code) => {
                 return `<pre><code>${escapeHtml(code.trim())}</code></pre>`;
             });
@@ -485,7 +499,9 @@
                 toolCallsHtml += '</div>';
             }
             
-            messageDiv.innerHTML = `<strong>${role === 'user' ? 'You' : 'AI Assistant'}:</strong><br>${toolCallsHtml}${formattedText}`;
+            const roleLabel = role === 'user' ? 'You' : (role === 'system' ? '' : 'AI Assistant');
+            const rolePrefix = roleLabel ? `<strong>${roleLabel}:</strong><br>` : '';
+            messageDiv.innerHTML = `${rolePrefix}${toolCallsHtml}${formattedText}`;
             chatContainer.appendChild(messageDiv);
             chatContainer.scrollTop = chatContainer.scrollHeight;
         }
