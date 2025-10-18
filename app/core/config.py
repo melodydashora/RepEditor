@@ -1,5 +1,5 @@
 """
-Configuration and database setup for Vecto Pilot Python backend
+Configuration and database setup for RepEditor Python backend
 """
 import os
 from typing import Optional
@@ -35,7 +35,7 @@ class Settings(BaseSettings):
     # Server settings
     PORT: int = int(os.getenv("PORT", "5000"))
     HOST: str = os.getenv("HOST", "0.0.0.0")
-    UI_ORIGIN: str = os.getenv("UI_ORIGIN", "https://vectopilot.com")
+    UI_ORIGIN: str = os.getenv("UI_ORIGIN", "https://dev.melodydashora.dev")
     
     # AI Model Configuration (GPT-5 single-path Triad)
     STRATEGIST_MODEL: str = os.getenv("STRATEGIST_MODEL", "claude-sonnet-4-5-20250929")

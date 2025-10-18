@@ -1,6 +1,6 @@
 """
-Vecto Pilot FastAPI Backend
-Production-grade gateway with strict CORS, trust proxy, and per-route JSON parsing
+RepEditor FastAPI Backend
+AI-Powered Repository Editor with GitHub integration
 """
 import os
 import time
@@ -23,10 +23,10 @@ from app.routes import chat, files, health, config, auth, repos
 async def lifespan(app: FastAPI):
     """Application lifespan: startup and shutdown events"""
     # Startup
-    print(f"🚀 [vecto-api] Starting in {settings.NODE_ENV.upper()} mode")
-    print(f"🚀 [vecto-api] Port: {settings.PORT}, Host: {settings.HOST}")
-    print(f"🚀 [vecto-api] UI Origin: {settings.UI_ORIGIN}")
-    print(f"🚀 [vecto-api] Triad Models: {settings.STRATEGIST_MODEL} → {settings.PLANNER_MODEL} → {settings.VALIDATOR_MODEL}")
+    print(f"🚀 [RepEditor] Starting in {settings.NODE_ENV.upper()} mode")
+    print(f"🚀 [RepEditor] Port: {settings.PORT}, Host: {settings.HOST}")
+    print(f"🚀 [RepEditor] UI Origin: {settings.UI_ORIGIN}")
+    print(f"🚀 [RepEditor] AI Models: {settings.STRATEGIST_MODEL} → {settings.PLANNER_MODEL} → {settings.VALIDATOR_MODEL}")
     
     # Verify database connection
     try:
@@ -38,15 +38,15 @@ async def lifespan(app: FastAPI):
     yield
     
     # Shutdown
-    print("[vecto-api] Shutting down gracefully...")
+    print("[RepEditor] Shutting down gracefully...")
     engine.dispose()
 
 
 # Initialize FastAPI app
 app = FastAPI(
-    title="Vecto Pilot API",
-    description="Rideshare driver assistance platform with AI-powered recommendations",
-    version="4.1.0",
+    title="RepEditor API",
+    description="AI-Powered Repository Editor with GitHub integration and code assistance",
+    version="1.0.0",
     lifespan=lifespan,
     docs_url="/docs",
     redoc_url="/redoc",

@@ -11,19 +11,19 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Vecto API"
+args = "RepEditor"
 
 [[workflows.workflow]]
-name = "Vecto API"
+name = "RepEditor"
 author = "agent"
-
-[workflows.workflow.metadata]
-outputType = "webview"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "python3.11 -m uvicorn app.main:app --host 0.0.0.0 --port 5000 --reload"
 waitForPort = 5000
+
+[workflows.workflow.metadata]
+outputType = "webview"
 
 [nix]
 packages = ["c-ares", "cargo", "fontconfig", "ghostscript", "glib", "grpc", "harfbuzz", "jiq", "jq", "jq-lsp", "jql", "libiconv", "libxcrypt", "lsof", "nodejs-18", "nodejs-20", "nodejs-22", "openssl", "pandoc", "pango", "pkg-config", "postgresql", "python312Packages.jq", "python312Packages.xstatic-jquery-ui", "python313Packages.django-jquery-js", "python313Packages.jq", "python313Packages.xstatic-jquery", "rustc", "tree", "undollar", "wkhtmltopdf", "zlib"]
@@ -45,10 +45,6 @@ exposeLocalhost = true
 [[ports]]
 localPort = 5000
 externalPort = 80
-
-[[ports]]
-localPort = 33827
-externalPort = 3000
 
 [deployment]
 run = ["node", "gateway-server.js"]
