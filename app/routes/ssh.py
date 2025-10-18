@@ -9,14 +9,11 @@ import tempfile
 from pathlib import Path
 from typing import List, Dict, Optional
 
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
-from sqlalchemy.orm import Session
 
-from app.core.config import settings, get_db
-from app.models.database import User
-from app.routes.auth import get_current_user
+from app.core.config import settings
 
 
 router = APIRouter(prefix="/api/ssh", tags=["ssh"])
@@ -45,16 +42,13 @@ class ReplConnect(BaseModel):
 
 
 @router.post("/keygen")
-async def generate_ssh_key(
-    req: SSHKeyGen,
-    current_user: User = Depends(get_current_user)
-):
+async def generate_ssh_key(req: SSHKeyGen):
     """Generate SSH keypair for Replit access"""
     try:
         ssh_dir = Path.home() / '.ssh'
         ssh_dir.mkdir(parents=True, exist_ok=True)
         
-        key_name = f"{req.key_name}_{current_user.id}"
+        key_name = req.key_name
         private_key_path = ssh_dir / key_name
         public_key_path = ssh_dir / f'{key_name}.pub'
         
@@ -65,7 +59,7 @@ async def generate_ssh_key(
                 '-t', req.key_type,
                 '-f', str(private_key_path),
                 '-N', '',  # No passphrase
-                '-C', f'repeditor-{current_user.username}@replit'
+                '-C', 'repeditor@replit'
             ],
             capture_output=True,
             text=True,
@@ -93,7 +87,7 @@ async def generate_ssh_key(
 
 
 @router.get("/keys")
-async def list_ssh_keys(current_user: User = Depends(get_current_user)):
+async def list_ssh_keys():
     """List SSH keys in user's .ssh directory"""
     try:
         ssh_dir = Path.home() / '.ssh'
@@ -125,10 +119,7 @@ async def list_ssh_keys(current_user: User = Depends(get_current_user)):
 # ============================================================================
 
 @router.post("/connect")
-async def connect_to_repl(
-    req: ReplConnect,
-    current_user: User = Depends(get_current_user)
-):
+async def connect_to_repl(req: ReplConnect):
     """
     Get SSH connection details for a Replit app
     
@@ -164,8 +155,7 @@ async def connect_to_repl(
 async def exec_ssh_command(
     repl_slug: str,
     repl_owner: str,
-    command: str,
-    current_user: User = Depends(get_current_user)
+    command: str
 ):
     """
     Execute command on remote Repl via SSH
@@ -197,7 +187,7 @@ async def exec_ssh_command(
 
 
 @router.get("/repls")
-async def list_replit_apps(current_user: User = Depends(get_current_user)):
+async def list_replit_apps():
     """
     List user's Replit apps
     
@@ -240,8 +230,7 @@ async def list_replit_apps(current_user: User = Depends(get_current_user)):
 async def browse_repl_files(
     repl_slug: str,
     repl_owner: str,
-    path: str = "/home/runner",
-    current_user: User = Depends(get_current_user)
+    path: str = "/home/runner"
 ):
     """Browse files in remote Repl via SSH"""
     try:
@@ -275,8 +264,7 @@ async def browse_repl_files(
 async def read_repl_file(
     repl_slug: str,
     repl_owner: str,
-    file_path: str,
-    current_user: User = Depends(get_current_user)
+    file_path: str
 ):
     """Read file content from remote Repl via SSH"""
     try:

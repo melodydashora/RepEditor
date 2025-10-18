@@ -1,19 +1,13 @@
 """AI Chat Assistant API routes with full repo access"""
 
 from fastapi import APIRouter, HTTPException
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
 import json
 import os
 import subprocess
 from pathlib import Path
-
-
-@router.get("/frame")
-async def gpt_frame():
-    """Serve dedicated GPT access interface"""
-    return FileResponse("app/static/gpt-frame.html")
-
 import httpx
 import ast
 
@@ -21,8 +15,13 @@ from openai import AsyncOpenAI
 from app.core.config import settings
 
 
-from fastapi.responses import FileResponse
+router = APIRouter(prefix="/api/chat", tags=["chat"])
 
+
+@router.get("/frame")
+async def gpt_frame():
+    """Serve dedicated GPT access interface"""
+    return FileResponse("app/static/gpt-frame.html")
 router = APIRouter(prefix="/api/chat", tags=["chat"])
 
 
