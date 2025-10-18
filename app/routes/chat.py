@@ -8,6 +8,7 @@ import os
 import subprocess
 from pathlib import Path
 import httpx
+import ast
 
 from openai import AsyncOpenAI
 from app.core.config import settings
@@ -732,10 +733,17 @@ Act directly. Use tools, don't describe using them."""
                     # Parse JSON response
                     try:
                         data = response.json()
+                        
+                        # If data is a string that looks like a Python list, parse it
+                        if isinstance(data, str) and data.startswith('['):
+                            try:
+                                data = ast.literal_eval(data)
+                            except Exception:
+                                pass  # Keep as string if parsing fails
                     except Exception:
-                        # If not JSON, return raw text
+                        # If JSON fails, return raw text
                         return ChatResponse(
-                            response=f"🔧 {model}\n\n{response.text}",
+                            response=response.text,
                             tool_calls=None
                         )
                     
@@ -743,26 +751,35 @@ Act directly. Use tools, don't describe using them."""
                     # Codex returns: [{'type': 'reasoning', ...}, {'type': 'message', 'content': [{'text': '...'}]}]
                     output_text = None
                     
+                    # Handle response array format
                     if isinstance(data, list):
                         # Find the message object in the response array
                         for item in data:
                             if isinstance(item, dict) and item.get("type") == "message":
                                 content_list = item.get("content", [])
-                                for content_item in content_list:
-                                    if isinstance(content_item, dict) and content_item.get("type") == "output_text":
-                                        output_text = content_item.get("text")
-                                        break
+                                if isinstance(content_list, list):
+                                    for content_item in content_list:
+                                        if isinstance(content_item, dict) and content_item.get("type") == "output_text":
+                                            output_text = content_item.get("text")
+                                            break
                                 if output_text:
                                     break
-                    elif isinstance(data, dict):
-                        # Single object response format
-                        output_text = data.get("output") or data.get("text") or data.get("response")
                     
-                    # Fallback if no text extracted
+                    # Handle single object response format
+                    elif isinstance(data, dict):
+                        # Try common response fields
+                        output_text = (
+                            data.get("output") or 
+                            data.get("text") or 
+                            data.get("response") or
+                            data.get("content")
+                        )
+                    
+                    # Fallback: stringify the whole response
                     if not output_text:
                         output_text = json.dumps(data, indent=2)
                     
-                    # Ensure output_text is a string
+                    # Final safety: ensure it's a string
                     if not isinstance(output_text, str):
                         output_text = str(output_text)
                     
