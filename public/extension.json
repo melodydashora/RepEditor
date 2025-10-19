@@ -8,13 +8,21 @@
       "name": "AI Assistant",
       "icon": "icon.svg"
     },
-    { "handler": "panel.html", "name": "Repo Fixer", "icon": "icon.svg" },
-    { "handler": "sql.html", "name": "SQL Viewer", "icon": "sql-icon.svg" },
+    {
+      "handler": "panel.html",
+      "name": "Repo Fixer",
+      "icon": "icon.svg"
+    },
+    {
+      "handler": "sql.html",
+      "name": "SQL Viewer",
+      "icon": "sql-icon.svg"
+    },
     {
       "handler": "logs.html",
       "name": "Logs and Diagnostics",
       "icon": "icon.svg"
-}
+    }
   ],
   "fileHandlers": [
     {
@@ -36,33 +44,27 @@
       "icon": "vecto-icon.svg"
     }
   ],
-  scopes: [
-
+  "scopes": [
     {
-      name: "read",
-      reason: "Read any file in your App"
+      "name": "read",
+      "reason": "Read any file in your App"
     },
-
     {
-    name: "write-exec",
-    reason: "Write to any file in your App and execute any code"
-  },
-
+      "name": "write-exec",
+      "reason": "Write to any file in your App and execute any code"
+    },
     {
-    name: "repldb:read",
-    reason: "Read any key, or list all keys under any prefix in the repldb belonging to your App"
-  },
-
+      "name": "repldb:read",
+      "reason": "Read any key, or list all keys under any prefix in the repldb belonging to your App"
+    },
     {
-    name: "repldb:write",
-    reason: "Write or delete any key in the repldb belonging to your App"
-  },
-
+      "name": "repldb:write",
+      "reason": "Write or delete any key in the repldb belonging to your App"
+    },
     {
-    name: "experimental-api",
-    reason: "Use experimental APIs that may be unstable, change in behavior, or be removed entirely"
-  }
-
+      "name": "experimental-api",
+      "reason": "Use experimental APIs that may be unstable, change in behavior, or be removed entirely"
+    }
   ],
-  longDescription: "Vecto Pilot AI (GPT-5) plans, diffs, commits and PRs. Tokens stay in the browser."
+  "longDescription": "Vecto Pilot AI (GPT-5) plans, diffs, commits and PRs. Tokens stay in the browser."
 }

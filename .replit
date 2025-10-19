@@ -1,5 +1,45 @@
+modules = ["nodejs-20", "python-3.11"]
 [extension]
 isExtension = true
 extensionID = "gpt-repo-access"
 buildCommand = ""
 outputDirectory = "public"
+
+[nix]
+packages = ["cargo", "libiconv", "libxcrypt", "lsof", "postgresql", "rustc"]
+channel = "stable-25_05"
+
+[agent]
+expertMode = true
+
+[[ports]]
+localPort = 5000
+externalPort = 80
+
+[[ports]]
+localPort = 41021
+externalPort = 3000
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "RepEditor"
+
+[[workflows.workflow]]
+name = "RepEditor"
+author = "agent"
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python -m uvicorn app.main:app --host 0.0.0.0 --port 5000 --reload"
+waitForPort = 5000
