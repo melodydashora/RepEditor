@@ -39,6 +39,7 @@ expertMode = true
 [extension]
 isExtension = true
 extensionID = "gpt-repo-access"
+buildCommand = "\""
 
 [[ports]]
 localPort = 3101

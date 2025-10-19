@@ -60,6 +60,18 @@
     name: "AI Assistant",
     icon: "/icon.svg",
     handler: "/gpt-frame.html"
+  },
+
+    {
+    name: "Logs & Diagnostics",
+    icon: "/icon.svg",
+    handler: "/logs.html"
+  },
+
+    {
+    name: "Settings",
+    icon: "/icon.svg",
+    handler: "/config.html"
   }
 
   ]
