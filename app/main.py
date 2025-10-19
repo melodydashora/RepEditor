@@ -392,8 +392,8 @@ async def extension_config():
 
 # Mount static files
 from fastapi.staticfiles import StaticFiles
-# Static files now served from /public directory for extension
-app.mount("/static", StaticFiles(directory="public"), name="static")
+# Mount static files from app/static directory  
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 # Register API routers
 app.include_router(auth.router)  # Authentication (GitHub OAuth + username/password)
