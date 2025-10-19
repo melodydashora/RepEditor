@@ -279,9 +279,16 @@ async def extension_manifest():
     return FileResponse("public/extension.json")
 
 
+@app.get("/gpt-frame.html")
+async def extension_gpt_frame():
+    """Extension AI Assistant HTML"""
+    from fastapi.responses import FileResponse
+    return FileResponse("public/gpt-frame.html")
+
+
 @app.get("/panel.html")
 async def extension_panel():
-    """Extension panel HTML"""
+    """Extension Repo Fixer panel HTML"""
     from fastapi.responses import FileResponse
     return FileResponse("public/panel.html")
 
