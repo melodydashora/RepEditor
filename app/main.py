@@ -349,6 +349,20 @@ async def extension_sql_icon():
     return FileResponse("public/sql-icon.svg", media_type="image/svg+xml")
 
 
+@app.get("/svg-editor.html")
+async def extension_svg_editor():
+    """Extension SVG editor HTML"""
+    from fastapi.responses import FileResponse
+    return FileResponse("public/svg-editor.html")
+
+
+@app.get("/config.html")
+async def extension_config():
+    """Extension settings HTML"""
+    from fastapi.responses import FileResponse
+    return FileResponse("public/config.html")
+
+
 # ============================================================================
 # API ROUTES
 # ============================================================================

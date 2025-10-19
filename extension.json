@@ -51,16 +51,10 @@
   tools: [
 
     {
-      name: "AI Assistant",
-      icon: "public/icon.svg",
-      handler: "gpt-frame.html"
-    },
-
-    {
-    name: "Repo Fixer",
-    icon: "app/static/icon.svg",
-    handler: "/panel.html"
-  }
+      name: "SQL Viewer",
+      icon: "/sql-icon.svg",
+      handler: "/sql.html"
+    }
 
   ]
 }
