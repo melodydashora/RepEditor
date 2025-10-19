@@ -60,6 +60,10 @@ externalPort = 80
 localPort = 36633
 externalPort = 3000
 
+[[ports]]
+localPort = 38709
+externalPort = 3002
+
 [deployment]
 run = ["node", "gateway-server.js"]
 
