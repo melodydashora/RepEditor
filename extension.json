@@ -72,6 +72,12 @@
     name: "Settings",
     icon: "/icon.svg",
     handler: "/config.html"
+  },
+
+    {
+    name: "Repo Fixer",
+    icon: "/sql-icon.svg",
+    handler: "public/panel.html"
   }
 
   ]

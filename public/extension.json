@@ -2,32 +2,75 @@
   "name": "GPT Repository Access",
   "description": "Vecto Pilot AI (GPT-5) plans → diffs → commits/PRs. Tokens stay in the browser.",
   "longDescription": "Unified SDK • GPT-5. The model plans, generates clean unified diffs, and opens PRs. Browser holds your GitHub token (PAT/Device Flow). Optional local-Repl FS + exec via experimental APIs. Diff viewer and job logs included.",
-  "icon": "/icon.svg",
+  "icon": "icon.svg",
   "tags": ["ai", "gpt5", "repo", "assistant", "codex", "devtools"],
-  "coverImages": [{ "path": "/cover1.png", "label": "Plan → Diff → PR" }],
+  "coverImages": [{"path": "/cover1.png", "label": "Plan → Diff → PR"}],
   "website": "https://vectopilot.com",
   "authorEmail": "bot@vectopilot.com",
-
   "tools": [
-    { "handler": "/gpt-frame.html", "name": "AI Assistant",        "icon": "/icon.svg" },
-    { "handler": "/panel.html",     "name": "Repo Fixer",          "icon": "/icon.svg" },
-    { "handler": "/sql.html",        "name": "SQL Viewer",          "icon": "/icon.svg" },
-    { "handler": "/logs.html",       "name": "Logs & Diagnostics",  "icon": "/icon.svg" },
-    { "handler": "/config.html",     "name": "Settings",            "icon": "/icon.svg" }
+    {
+      "handler": "gpt-frame.html",
+      "name": "AI Assistant",
+      "icon": "icon.svg"
+    },
+    {
+      "handler": "panel.html",
+      "name": "Repo Fixer",
+      "icon": "icon.svg"
+    },
+    {
+      "handler": "sql.html",
+      "name": "SQL Viewer",
+      "icon": "icon.svg"
+    },
+    {
+      "handler": "logs.html",
+      "name": "Logs & Diagnostics",
+      "icon": "icon.svg"
+    },
+    {
+      "handler": "config.html",
+      "name": "Settings",
+      "icon": "icon.svg"
+    }
   ],
-
   "fileHandlers": [
-    { "glob": "*.svg",              "handler": "/svg-editor.html", "name": "SVG Editor",  "icon": "/icon.svg" },
-    { "glob": "**/*.{diff,patch}",  "handler": "/diff.html",       "name": "Diff Viewer", "icon": "/icon.svg" }
+    {
+      "glob": "*.svg",
+      "handler": "svg-editor.html",
+      "name": "SVG Editor",
+      "icon": "icon.svg"
+    },
+    {
+      "glob": "**/*.{diff,patch}",
+      "handler": "diff.html",
+      "name": "Diff Viewer",
+      "icon": "icon.svg"
+    }
   ],
-
   "scopes": [
-    { "name": "read",            "reason": "Read files for previews and diffs" },
-    { "name": "write-exec",      "reason": "Write patches and run commands when applying fixes" },
-    { "name": "repldb:read",     "reason": "Load cached plans/diffs" },
-    { "name": "repldb:write",    "reason": "Store cached plans/diffs and settings" },
-    { "name": "experimental-api","reason": "Use experimental fs/process APIs from the pane" }
+    {
+      "name": "read",
+      "reason": "Read files for previews and diffs"
+    },
+    {
+      "name": "write-exec",
+      "reason": "Write patches and run commands when applying fixes"
+    },
+    {
+      "name": "repldb:read",
+      "reason": "Load cached plans/diffs"
+    },
+    {
+      "name": "repldb:write",
+      "reason": "Store cached plans/diffs and settings"
+    },
+    {
+      "name": "experimental-api",
+      "reason": "Use experimental fs/process APIs from the pane"
+    }
   ],
-
-  "background": { "page": "/background.html" }
+  "background": {
+    "page": "background.html"
+  }
 }
