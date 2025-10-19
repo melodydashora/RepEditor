@@ -22,11 +22,6 @@
       "handler": "logs.html",
       "name": "Logs and Diagnostics",
       "icon": "icon.svg"
-    },
-    {
-      "handler": "config.html",
-      "name": "Settings",
-      "icon": "icon.svg"
     }
   ],
   "fileHandlers": [
