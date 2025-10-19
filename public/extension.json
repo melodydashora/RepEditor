@@ -66,5 +66,14 @@
       "reason": "Use experimental APIs that may be unstable, change in behavior, or be removed entirely"
     }
   ],
-  "longDescription": "Vecto Pilot AI (GPT-5) plans, diffs, commits and PRs. Tokens stay in the browser."
+  "longDescription": "Vecto Pilot AI (GPT-5) plans, diffs, commits and PRs. Tokens stay in the browser.",
+  features: [
+
+    {
+      title: "🚀 Overview GPT Repository Access is a powerful AI-powered e",
+      body: "Direct access to GPT-5, Claude, and other cutting-edge AI models\nContext-aware code generation and suggestions\nNatural language to code translation\nIntelligent debugging and error resolution\nReal-time pair programming with AI\n🔧 Repo Fixer\n\nAutomated repository analysis and optimization\nIdentify and fix code issues across your entire codebase\nGenerate pull requests with AI-crafted commits\nSmart refactoring suggestions\nDependency management and updates\n📊 SQL Viewer\n\nVisual database schema exploration\nAI-powered query generation and optimization\nReal-time database monitoring\nExport and import capabilities\nQuery performance analysis\n📝 Logs & Diagnostics\n\nComprehensive log aggregation and analysis\nAI-powered error detection and resolution suggestions\nPerformance monitoring and bottleneck identification\nReal-time debugging insights\nHistorical log search and filtering\n🎯 Perfect For\nDevelopers looking to accelerate their coding workflow\nTeams wanting AI-powered code reviews and improvements\nStudents learning to code with AI assistance\nProjects requiring rapid prototyping and iteration\n🔐 Security First\nAll API tokens stored securely in browser session\nNo server-side credential storage\nEncrypted communication channels\nGranular permission controls\nComplete data privacy\n📋 File Handler Support\nSVG Editor: Edit and optimize SVG files with AI assistance\nDiff Viewer: Review and understand code changes\nPatch Viewer: Apply and manage code patches intelligently\n🎨 Why Choose This Extension?\nZero Configuration: Works out of the box with your existing repositories\nMulti-Model Support: Access OpenAI, Anthropic, and Google AI models\nProduction Ready: Built for reliability and performance\nActive Development: Regular updates with new features\nCommunity Driven: Open to feedback and feature requests\n⚡ Getting Started\nSimply install the extension, configure your API keys through the secure settings panel, and start leveraging AI to supercharge your development workflow. Whether you're de",
+      image: null
+    }
+
+  ]
 }
