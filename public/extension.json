@@ -9,7 +9,7 @@
       "icon": "/icon.svg"
     },
     {
-      "handler": "/panel.html", 
+      "handler": "/panel.html",
       "name": "Repo Fixer",
       "icon": "/icon.svg"
     },
@@ -26,6 +26,26 @@
     {
       "handler": "/config.html",
       "name": "Settings",
+      "icon": "/icon.svg"
+    }
+  ],
+  "fileHandlers": [
+    {
+      "glob": "*.svg",
+      "handler": "/svg-editor.html",
+      "name": "SVG Editor",
+      "icon": "/icon.svg"
+    },
+    {
+      "glob": "*.diff",
+      "handler": "/diff.html",
+      "name": "Diff Viewer",
+      "icon": "/icon.svg"
+    },
+    {
+      "glob": "*.patch",
+      "handler": "/diff.html",
+      "name": "Patch Viewer",
       "icon": "/icon.svg"
     }
   ]
