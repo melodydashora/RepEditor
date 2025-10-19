@@ -262,20 +262,21 @@ async def diagnostics():
 async def root():
     """Landing page - AI Chat Assistant"""
     from fastapi.responses import FileResponse
-    return FileResponse("app/static/chat.html")
+    return FileResponse("public/chat.html")
 
 
 @app.get("/chat")
 async def chat_page():
     """AI Chat Assistant page"""
     from fastapi.responses import FileResponse
-    return FileResponse("app/static/chat.html")
+    return FileResponse("public/chat.html")
 
 
 @app.get("/extension.json")
 async def extension_manifest():
     """Replit Extension manifest for workspace tool"""
     from fastapi.responses import FileResponse
+    # Serve the correct extension.json from public directory
     return FileResponse("public/extension.json")
 
 
@@ -363,6 +364,7 @@ async def extension_vecto_icon():
     return FileResponse("public/vecto-icon.svg", media_type="image/svg+xml")
 
 
+# Route for backward compatibility - remove after transition
 @app.get("/app/static/vecto-icon.svg")
 async def extension_vecto_icon_static():
     """Vecto Pilot icon (static path)"""
@@ -390,7 +392,8 @@ async def extension_config():
 
 # Mount static files
 from fastapi.staticfiles import StaticFiles
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
+# Static files now served from /public directory for extension
+app.mount("/static", StaticFiles(directory="public"), name="static")
 
 # Register API routers
 app.include_router(auth.router)  # Authentication (GitHub OAuth + username/password)
