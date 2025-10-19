@@ -1,0 +1,25 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Vecto Pilot AI</title>
+  <style>
+    :root{--bg:#0b1220;--pane:#0f172a;--line:#24314f;--fg:#e2e8f0}
+    html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font:14px/1.4 system-ui}
+    .top{display:flex;align-items:center;gap:8px;padding:8px;border-bottom:1px solid var(--line);background:var(--pane)}
+    .pill{padding:2px 8px;border:1px solid var(--line);border-radius:999px;opacity:.85}
+    .btn{background:#1d2951;border:1px solid #27355b;color:var(--fg);padding:6px 10px;border-radius:8px;cursor:pointer}
+    iframe{border:0;display:block;width:100%;height:calc(100% - 44px)}
+  </style>
+</head>
+<body>
+  <div class="top">
+    <strong>Vecto Pilot AI</strong>
+    <span id="ctx" class="pill">loading…</span>
+    <button id="open" class="btn">Open Full App</button>
+  </div>
+  <iframe id="app" src="about:blank" allow="clipboard-read *; clipboard-write *"></iframe>
+  <script type="module" src="/panel.js"></script>
+</body>
+</html>
