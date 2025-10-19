@@ -262,7 +262,7 @@ async def diagnostics():
 async def root():
     """Landing page - AI Chat Assistant"""
     from fastapi.responses import FileResponse
-    return FileResponse("public/chat.html")
+    return FileResponse("public/panel.html")
 
 
 @app.get("/chat")
