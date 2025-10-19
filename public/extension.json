@@ -11,7 +11,8 @@
   "tools": [
     { "handler": "/panel.html", "name": "Vecto Pilot AI", "icon": "/icon.svg" },
     { "handler": "/diff.html",  "name": "Diff Viewer",     "icon": "/icon.svg" },
-    { "handler": "/logs.html",  "name": "Job Logs",        "icon": "/icon.svg" }
+    { "handler": "/logs.html",  "name": "Job Logs",        "icon": "/icon.svg" },
+    { "handler": "/sql.html",   "name": "SQL Viewer",      "icon": "/sql-icon.svg" }
   ],
 
   "fileHandlers": [

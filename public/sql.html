@@ -1,0 +1,104 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>SQL Viewer</title>
+  <style>
+    :root{--bg:#0b1220;--pane:#0f172a;--line:#24314f;--fg:#e2e8f0;--accent:#93c5fd}
+    html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font:14px/1.6 system-ui}
+    .header{padding:12px 16px;background:var(--pane);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px}
+    .header h1{margin:0;font-size:18px;display:flex;align-items:center;gap:8px}
+    .sql-icon{width:24px;height:24px}
+    .container{display:flex;height:calc(100% - 56px)}
+    .query-pane{flex:1;padding:16px;display:flex;flex-direction:column;gap:12px}
+    .result-pane{flex:1;padding:16px;border-left:1px solid var(--line);overflow:auto}
+    .query-input{background:var(--pane);border:1px solid var(--line);color:var(--fg);padding:12px;border-radius:8px;font-family:ui-monospace,monospace;font-size:13px;resize:vertical;min-height:120px}
+    .btn{background:#1d4ed8;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:14px}
+    .btn:hover{background:#1e40af}
+    .result-table{width:100%;border-collapse:collapse;font-size:13px}
+    .result-table th{background:var(--pane);padding:8px;text-align:left;border:1px solid var(--line)}
+    .result-table td{padding:8px;border:1px solid var(--line)}
+    .status{padding:8px;background:var(--pane);border-radius:4px;font-size:13px;margin-bottom:12px}
+    .status.success{border-left:3px solid #10b981}
+    .status.error{border-left:3px solid #ef4444}
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>
+      <svg class="sql-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+        <ellipse cx="12" cy="8" rx="6" ry="2" fill="#93c5fd"/>
+        <path d="M6 8v8c0 1.1 2.7 2 6 2s6-.9 6-2V8" fill="#93c5fd"/>
+        <ellipse cx="12" cy="11" rx="6" ry="2" fill="#5b8bc9"/>
+        <ellipse cx="12" cy="14" rx="6" ry="2" fill="#4a7ab8"/>
+      </svg>
+      SQL Viewer
+    </h1>
+    <span style="opacity:0.7;font-size:13px">Query your PostgreSQL database</span>
+  </div>
+  <div class="container">
+    <div class="query-pane">
+      <textarea id="query" class="query-input" placeholder="SELECT * FROM users LIMIT 10;">SELECT * FROM users LIMIT 10;</textarea>
+      <div>
+        <button id="run" class="btn">Execute Query</button>
+        <button id="clear" class="btn" style="background:#374151">Clear</button>
+      </div>
+    </div>
+    <div class="result-pane" id="results">
+      <div class="status">Ready to execute queries...</div>
+    </div>
+  </div>
+  <script type="module">
+    const query = document.getElementById('query');
+    const results = document.getElementById('results');
+    const runBtn = document.getElementById('run');
+    const clearBtn = document.getElementById('clear');
+
+    async function executeQuery() {
+      const sql = query.value.trim();
+      if (!sql) return;
+
+      results.innerHTML = '<div class="status">Executing...</div>';
+      
+      try {
+        const response = await fetch('/api/sql/query', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query: sql })
+        });
+
+        const data = await response.json();
+        
+        if (data.error) {
+          results.innerHTML = `<div class="status error">Error: ${data.error}</div>`;
+        } else if (data.rows && data.rows.length > 0) {
+          const cols = Object.keys(data.rows[0]);
+          let html = `<div class="status success">Returned ${data.rows.length} rows</div>`;
+          html += '<table class="result-table"><thead><tr>';
+          cols.forEach(col => html += `<th>${col}</th>`);
+          html += '</tr></thead><tbody>';
+          data.rows.forEach(row => {
+            html += '<tr>';
+            cols.forEach(col => html += `<td>${row[col] ?? 'NULL'}</td>`);
+            html += '</tr>';
+          });
+          html += '</tbody></table>';
+          results.innerHTML = html;
+        } else {
+          results.innerHTML = '<div class="status success">Query executed successfully (no rows returned)</div>';
+        }
+      } catch (error) {
+        results.innerHTML = `<div class="status error">Failed: ${error.message}</div>`;
+      }
+    }
+
+    runBtn.onclick = executeQuery;
+    clearBtn.onclick = () => { query.value = ''; results.innerHTML = '<div class="status">Ready...</div>'; };
+    
+    // Execute on Ctrl+Enter
+    query.addEventListener('keydown', (e) => {
+      if (e.ctrlKey && e.key === 'Enter') executeQuery();
+    });
+  </script>
+</body>
+</html>

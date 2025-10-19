@@ -335,6 +335,20 @@ async def extension_background():
     return FileResponse("public/background.html")
 
 
+@app.get("/sql.html")
+async def extension_sql():
+    """Extension SQL viewer HTML"""
+    from fastapi.responses import FileResponse
+    return FileResponse("public/sql.html")
+
+
+@app.get("/sql-icon.svg")
+async def extension_sql_icon():
+    """SQL viewer icon"""
+    from fastapi.responses import FileResponse
+    return FileResponse("public/sql-icon.svg", media_type="image/svg+xml")
+
+
 # ============================================================================
 # API ROUTES
 # ============================================================================
