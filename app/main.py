@@ -356,6 +356,20 @@ async def extension_sql_icon():
     return FileResponse("public/sql-icon.svg", media_type="image/svg+xml")
 
 
+@app.get("/vecto-icon.svg")
+async def extension_vecto_icon():
+    """Vecto Pilot icon"""
+    from fastapi.responses import FileResponse
+    return FileResponse("public/vecto-icon.svg", media_type="image/svg+xml")
+
+
+@app.get("/app/static/vecto-icon.svg")
+async def extension_vecto_icon_static():
+    """Vecto Pilot icon (static path)"""
+    from fastapi.responses import FileResponse
+    return FileResponse("public/vecto-icon.svg", media_type="image/svg+xml")
+
+
 @app.get("/svg-editor.html")
 async def extension_svg_editor():
     """Extension SVG editor HTML"""
