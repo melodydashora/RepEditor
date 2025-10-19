@@ -2,50 +2,47 @@
   "name": "GPT Repository Access",
   "description": "Vecto Pilot AI (GPT-5) plans → diffs → commits/PRs. Tokens stay in the browser.",
   "longDescription": "Unified SDK • GPT-5. The model plans, generates clean unified diffs, and opens PRs. Browser holds your GitHub token (PAT/Device Flow). Optional local-Repl FS + exec via experimental APIs. Diff viewer and job logs included.",
-  "icon": "icon.svg",
+  "icon": "/icon.svg",
   "tags": ["ai", "gpt5", "repo", "assistant", "codex", "devtools"],
-  "coverImages": [{"path": "/cover1.png", "label": "Plan → Diff → PR"}],
-  "website": "https://vectopilot.com",
-  "authorEmail": "bot@vectopilot.com",
   "tools": [
     {
-      "handler": "gpt-frame.html",
+      "handler": "/gpt-frame.html",
       "name": "AI Assistant",
-      "icon": "icon.svg"
+      "icon": "/icon.svg"
     },
     {
-      "handler": "panel.html",
+      "handler": "/panel.html",
       "name": "Repo Fixer",
-      "icon": "icon.svg"
+      "icon": "/icon.svg"
     },
     {
-      "handler": "sql.html",
+      "handler": "/sql.html",
       "name": "SQL Viewer",
-      "icon": "icon.svg"
+      "icon": "/icon.svg"
     },
     {
-      "handler": "logs.html",
+      "handler": "/logs.html",
       "name": "Logs & Diagnostics",
-      "icon": "icon.svg"
+      "icon": "/icon.svg"
     },
     {
-      "handler": "config.html",
+      "handler": "/config.html",
       "name": "Settings",
-      "icon": "icon.svg"
+      "icon": "/icon.svg"
     }
   ],
   "fileHandlers": [
     {
       "glob": "*.svg",
-      "handler": "svg-editor.html",
+      "handler": "/svg-editor.html",
       "name": "SVG Editor",
-      "icon": "icon.svg"
+      "icon": "/icon.svg"
     },
     {
       "glob": "**/*.{diff,patch}",
-      "handler": "diff.html",
+      "handler": "/diff.html",
       "name": "Diff Viewer",
-      "icon": "icon.svg"
+      "icon": "/icon.svg"
     }
   ],
   "scopes": [
@@ -71,6 +68,6 @@
     }
   ],
   "background": {
-    "page": "background.html"
+    "page": "/background.html"
   }
 }
