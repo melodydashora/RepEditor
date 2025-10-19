@@ -30,5 +30,22 @@
   }
 
   ],
-  longDescription: "Vecto Pilot AI (Unified SDK • GPT-5) plans → diffs → commits.\\n- Browser holds your GitHub token (PAT or Device Flow)\\n- Server clones per-request, applies unified diff, pushes branch, opens PR\\n- Optional local-Repl FS bridge via experimental APIs"
+  longDescription: "Vecto Pilot AI (Unified SDK • GPT-5) plans → diffs → commits.\\n- Browser holds your GitHub token (PAT or Device Flow)\\n- Server clones per-request, applies unified diff, pushes branch, opens PR\\n- Optional local-Repl FS bridge via experimental APIs",
+  fileHandlers: [
+
+    {
+      name: "SVG Editor",
+      icon: "/icon.svg",
+      handler: "/svg-editor",
+      glob: "*.svg"
+    },
+
+    {
+    name: "Diff Viewer",
+    icon: "/icon.svg",
+    handler: "/diff.html",
+    glob: "*.diff"
+  }
+
+  ]
 }
