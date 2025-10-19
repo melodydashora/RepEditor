@@ -54,7 +54,13 @@
       name: "SQL Viewer",
       icon: "/sql-icon.svg",
       handler: "/sql.html"
-    }
+    },
+
+    {
+    name: "AI Assistant",
+    icon: "/icon.svg",
+    handler: "/gpt-frame.html"
+  }
 
   ]
 }
