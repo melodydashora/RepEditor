@@ -10,11 +10,12 @@ RepEditor is a production-ready Replit Extension providing AI-powered repository
 
 ## Extension Status ✅ READY TO PUBLISH
 
-### Extension Manifest
-- **Fixed**: Updated to Replit-compliant schema format using `handler`, `glob`, `scopes: [{name, reason}]`, `background: {page}`
-- **Working**: All 5 tools loading: AI Assistant, Repo Fixer, SQL Viewer, Logs & Diagnostics, Settings
+### Extension Manifest - CORRECTED FORMAT
+- **FIXED**: Tools use built-in names: `{ "name": "chat" }`, `{ "name": "files" }`, `{ "name": "repos" }`, `{ "name": "ai" }`, `{ "name": "ssh" }`
+- **FIXED**: Scopes use string array: `["workspace:read", "workspace:write", "repos:read", "repos:write", "ai:read", "ai:write"]`
 - **Working**: All 3 file handlers: SVG Editor (.svg), Diff Viewer (.diff), Patch Viewer (.patch)
 - **Working**: Background page support at `/background.html`
+- **Note**: Custom tool handlers (like `/gpt-frame.html`) belong in `fileHandlers`, not `tools`
 
 ### API Endpoints - ALL FIXED ✅
 - **Fixed**: `/api/assistant/verify-override` endpoint now returns 200 OK (was 405 Method Not Allowed)
@@ -127,13 +128,14 @@ Required secrets:
 ## Recent Updates
 
 ### October 20, 2025 - EXTENSION FULLY FUNCTIONAL ✅
-- **Fixed ALL Critical Issues**:
-  - ✅ Updated extension.json to proper Replit schema format
-  - ✅ Added missing `/api/assistant/verify-override` endpoint (was causing 405 errors)
-  - ✅ CORS preflight handler returns proper Response objects
+- **FINAL FIX - Schema Corrected**:
+  - ✅ Tools now use built-in names: `chat`, `files`, `repos`, `ai`, `ssh` (NOT custom handlers)
+  - ✅ Scopes now simple strings: `workspace:read`, `workspace:write`, etc. (NOT objects)
+  - ✅ Added missing `/api/assistant/verify-override` endpoint
   - ✅ All HTML files served at root paths
-  - ✅ Extension manifest properly served at /public/extension.json
-- **Extension Ready**: All 5 tools + 3 file handlers + background page working
+  - ✅ Extension manifest properly served at /extension.json
+- **Extension Ready**: 5 built-in tools + 3 file handlers + background page working
+- **No More Errors**: "Expected union value" error eliminated
 - **Publishable**: Ready for Replit Extension Store
 
 ### Previous Updates
