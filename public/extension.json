@@ -1,81 +1,22 @@
 {
   "name": "GPT Repository Access",
-  "description": "Vecto Pilot AI (GPT-5) plans, diffs, commits and PRs. Tokens stay in the browser.",
-  "longDescription": "AI-powered repo editor for Replit: plan with GPT-5, generate diffs, stage/commit, open PRs, inspect logs, and tweak settings. Ships file handlers for .svg and .diff/.patch. Nothing leaves your browser unless you push.",
+  "description": "AI-powered repository editor",
   "icon": "/icon.svg",
-  "tags": ["AI", "Git", "Repository", "Assistant"],
-  "website": "https://dev.melodydashora.dev",
-  "authorEmail": "bot@vectopilot.com",
   "tools": [
     {
-      "handler": "/gpt-frame.html",
-      "name": "AI Assistant",
-      "icon": "/icon.svg"
-    },
-    {
-      "handler": "/panel.html",
-      "name": "Repo Fixer",
-      "icon": "/icon.svg"
-    },
-    {
-      "handler": "/sql.html",
-      "name": "SQL Viewer",
-      "icon": "/icon.svg"
-    },
-    {
-      "handler": "/logs.html",
-      "name": "Logs & Diagnostics",
-      "icon": "/icon.svg"
-    },
-    {
-      "handler": "/config.html",
-      "name": "Settings",
-      "icon": "/icon.svg"
+      "handler": "/gpt-frame.html"
     }
   ],
   "fileHandlers": [
     {
       "glob": "*.svg",
-      "handler": "/svg-editor.html",
-      "name": "SVG Editor",
-      "icon": "/icon.svg"
-    },
-    {
-      "glob": "*.diff",
-      "handler": "/diff.html",
-      "name": "Diff Viewer",
-      "icon": "/icon.svg"
-    },
-    {
-      "glob": "*.patch",
-      "handler": "/diff.html",
-      "name": "Patch Viewer",
-      "icon": "/icon.svg"
+      "handler": "/svg-editor.html"
     }
   ],
   "scopes": [
     {
       "name": "read",
-      "reason": "This extension needs to read files for its functionality."
-    },
-    {
-      "name": "write-exec",
-      "reason": "This extension needs to write files and execute commands."
-    },
-    {
-      "name": "repldb:read",
-      "reason": "This extension needs to read data from ReplDB."
-    },
-    {
-      "name": "repldb:write",
-      "reason": "This extension needs to write data to ReplDB."
-    },
-    {
-      "name": "experimental-api",
-      "reason": "This extension uses experimental APIs for advanced features."
+      "reason": "Read files"
     }
-  ],
-  "background": {
-    "page": "/background.html"
-  }
+  ]
 }
