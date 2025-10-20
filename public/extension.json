@@ -1,22 +1,49 @@
 {
   "name": "GPT Repository Access",
-  "description": "AI-powered repository editor",
+  "description": "Vecto Pilot AI (GPT-5) plans, diffs, commits and PRs. Tokens stay in the browser.",
+  "longDescription": "AI-powered repo editor for Replit: plan with GPT-5, generate diffs, stage/commit, open PRs, inspect logs, and tweak settings. Ships file handlers for .svg and .diff/.patch. Nothing leaves your browser unless you push.",
   "icon": "/icon.svg",
+  "tags": ["AI", "Git", "Repository", "Assistant"],
+  "website": "https://dev.melodydashora.dev",
+  "authorEmail": "bot@vectopilot.com",
   "tools": [
-    {
-      "handler": "/gpt-frame.html"
-    }
+    { "name": "chat" },
+    { "name": "files" },
+    { "name": "repos" },
+    { "name": "ai" },
+    { "name": "ssh" }
   ],
   "fileHandlers": [
     {
       "glob": "*.svg",
-      "handler": "/svg-editor.html"
+      "handler": "/svg-editor.html",
+      "name": "SVG Editor",
+      "icon": "/icon.svg"
+    },
+    {
+      "glob": "*.diff",
+      "handler": "/diff.html",
+      "name": "Diff Viewer",
+      "icon": "/icon.svg"
+    },
+    {
+      "glob": "*.patch",
+      "handler": "/diff.html",
+      "name": "Patch Viewer",
+      "icon": "/icon.svg"
     }
   ],
   "scopes": [
-    {
-      "name": "read",
-      "reason": "Read files"
-    }
-  ]
+    "workspace:read",
+    "workspace:write",
+    "secrets:read",
+    "secrets:write",
+    "repos:read",
+    "repos:write",
+    "ai:read",
+    "ai:write"
+  ],
+  "background": {
+    "page": "/background.html"
+  }
 }
