@@ -288,6 +288,9 @@ def extension_panel_js(): return public_file("panel.js")
 @app.get("/icon.svg")
 def extension_icon(): return public_file("icon.svg")
 
+@app.get("/favicon.ico")
+def favicon(): return public_file("icon.svg")
+
 @app.get("/diff.html")
 def extension_diff(): return public_file("diff.html")
 

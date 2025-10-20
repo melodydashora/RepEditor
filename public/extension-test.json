@@ -1,0 +1,53 @@
+{
+  "name": "GPT Repository Access",
+  "description": "Vecto Pilot AI (GPT-5) plans, diffs, commits and PRs. Tokens stay in the browser.",
+  "longDescription": "AI-powered repo editor for Replit: plan with GPT-5, generate diffs, stage/commit, open PRs, inspect logs, and tweak settings. Ships file handlers for .svg and .diff/.patch. Nothing leaves your browser unless you push.",
+  "icon": "/icon.svg",
+  "tags": ["AI", "Git", "Repository", "Assistant"],
+  "website": "https://dev.melodydashora.dev",
+  "authorEmail": "bot@vectopilot.com",
+  "tools": [
+    {
+      "handler": "/gpt-frame.html"
+    }
+  ],
+  "fileHandlers": [
+    {
+      "glob": "*.svg",
+      "handler": "/svg-editor.html"
+    },
+    {
+      "glob": "*.diff",
+      "handler": "/diff.html"
+    },
+    {
+      "glob": "*.patch",
+      "handler": "/diff.html"
+    }
+  ],
+  "scopes": [
+    {
+      "name": "read",
+      "reason": "This extension needs to read files for its functionality."
+    },
+    {
+      "name": "write-exec",
+      "reason": "This extension needs to write files and execute commands."
+    },
+    {
+      "name": "repldb:read",
+      "reason": "This extension needs to read data from ReplDB."
+    },
+    {
+      "name": "repldb:write",
+      "reason": "This extension needs to write data from ReplDB."
+    },
+    {
+      "name": "experimental-api",
+      "reason": "This extension uses experimental APIs for advanced features."
+    }
+  ],
+  "background": {
+    "page": "/background.html"
+  }
+}
