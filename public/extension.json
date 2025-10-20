@@ -7,11 +7,31 @@
   "website": "https://dev.melodydashora.dev",
   "authorEmail": "bot@vectopilot.com",
   "tools": [
-    { "name": "chat" },
-    { "name": "files" },
-    { "name": "repos" },
-    { "name": "ai" },
-    { "name": "ssh" }
+    {
+      "handler": "/gpt-frame.html",
+      "name": "AI Assistant",
+      "icon": "/icon.svg"
+    },
+    {
+      "handler": "/panel.html",
+      "name": "Repo Fixer",
+      "icon": "/icon.svg"
+    },
+    {
+      "handler": "/sql.html",
+      "name": "SQL Viewer",
+      "icon": "/icon.svg"
+    },
+    {
+      "handler": "/logs.html",
+      "name": "Logs & Diagnostics",
+      "icon": "/icon.svg"
+    },
+    {
+      "handler": "/config.html",
+      "name": "Settings",
+      "icon": "/icon.svg"
+    }
   ],
   "fileHandlers": [
     {
@@ -34,14 +54,26 @@
     }
   ],
   "scopes": [
-    "workspace:read",
-    "workspace:write",
-    "secrets:read",
-    "secrets:write",
-    "repos:read",
-    "repos:write",
-    "ai:read",
-    "ai:write"
+    {
+      "name": "read",
+      "reason": "Read any file in your App"
+    },
+    {
+      "name": "write-exec",
+      "reason": "Write to any file and execute code/commands"
+    },
+    {
+      "name": "repldb:read",
+      "reason": "Read keys from ReplDB"
+    },
+    {
+      "name": "repldb:write",
+      "reason": "Write/Delete keys in ReplDB"
+    },
+    {
+      "name": "experimental-api",
+      "reason": "Use experimental APIs for advanced features"
+    }
   ],
   "background": {
     "page": "/background.html"
