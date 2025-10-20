@@ -1,23 +1,25 @@
 {
   "name": "GPT Repository Access",
-  "description": "Vecto Pilot AI (GPT-5) plans, diffs, commits, and PRs. Tokens stay in the browser.",
+  "description": "AI-powered development tools for debugging, refactoring, and repo control",
   "icon": "icon.svg",
-  "longDescription": "Public extension providing GPT-5 assisted repo editing, diagnostics, and PR automation. All OAuth/PAT tokens remain in the browser.",
+  "longDescription": "This extension brings GPT-5 and other AI models into your workspace for intelligent debugging, code generation, and repo diagnostics.",
   "scopes": [
     { "$case": "workspace" },
     { "$case": "repl" }
   ],
   "tools": [
-    { "$case": "panel", "name": "AI Assistant", "htmlPath": "gpt-frame.html" },
-    { "$case": "panel", "name": "Repo Fixer", "htmlPath": "panel.html" },
-    { "$case": "panel", "name": "SQL Viewer", "htmlPath": "sql.html" },
-    { "$case": "panel", "name": "Logs & Diagnostics", "htmlPath": "logs.html" },
-    { "$case": "panel", "name": "Settings", "htmlPath": "config.html" }
+    {
+      "$case": "panel",
+      "name": "AI Assistant",
+      "htmlPath": "gpt-frame.html"
+    }
   ],
   "fileHandlers": [
-    { "$case": "file", "name": "SVG Editor", "htmlPath": "svg-editor.html", "pattern": "*.svg" },
-    { "$case": "file", "name": "Diff Viewer", "htmlPath": "diff.html", "pattern": "*.diff" },
-    { "$case": "file", "name": "Patch Viewer", "htmlPath": "diff.html", "pattern": "*.patch" }
-  ],
-  "background": { "page": "background.html" }
+    {
+      "$case": "file",
+      "name": "SVG Editor",
+      "htmlPath": "svg-editor.html",
+      "pattern": "*.svg"
+    }
+  ]
 }
