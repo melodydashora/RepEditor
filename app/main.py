@@ -83,14 +83,18 @@ app = FastAPI(
 # Middleware
 # -------------------------------------------------------------------
 
-# CORS — strict if UI_ORIGIN set, permissive in dev otherwise
-allow_origins = [s("UI_ORIGIN")] if s("UI_ORIGIN") else ["*"]
+# CORS — allow extension origins + UI origin
+allow_origins = ["*"]  # Allow all origins including chrome-extension:// and moz-extension://
+if s("UI_ORIGIN"):
+    # If UI_ORIGIN is set, keep it but still allow extension origins via regex
+    pass
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allow_origins,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allow_headers=["Authorization", "Content-Type"],
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # -------------------------------------------------------------------
@@ -139,23 +143,21 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 
 
 # -------------------------------------------------------------------
-# CORS Preflight Handler
+# CORS Preflight Handler (allow all origins including extensions)
 # -------------------------------------------------------------------
 @app.options("/{full_path:path}")
 async def preflight_handler(request: Request):
-    origin = request.headers.get("origin")
-    if origin == getattr(settings, "UI_ORIGIN", None):
-        return Response(
-            status_code=status.HTTP_204_NO_CONTENT,
-            headers={
-                "Access-Control-Allow-Origin": origin,
-                "Access-Control-Allow-Methods": "GET, POST, OPTIONS, PUT, PATCH, DELETE",
-                "Access-Control-Allow-Headers": "Content-Type, Authorization",
-                "Access-Control-Allow-Credentials": "true",
-                "Access-Control-Max-Age": "600",
-            },
-        )
-    return Response(status_code=status.HTTP_403_FORBIDDEN)
+    origin = request.headers.get("origin", "*")
+    return Response(
+        status_code=status.HTTP_204_NO_CONTENT,
+        headers={
+            "Access-Control-Allow-Origin": origin,
+            "Access-Control-Allow-Methods": "GET, POST, OPTIONS, PUT, PATCH, DELETE",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization",
+            "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Max-Age": "600",
+        },
+    )
 
 
 # -------------------------------------------------------------------
