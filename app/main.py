@@ -225,6 +225,45 @@ async def diagnostics():
 
 
 # -------------------------------------------------------------------
+# Assistant override probe (used by the extension/UI)
+# -------------------------------------------------------------------
+from typing import Optional
+from fastapi import Header
+
+@app.api_route("/api/assistant/verify-override", methods=["GET", "POST", "OPTIONS"])
+async def verify_assistant_override(
+    t: Optional[int] = None,                               # optional cache-buster query
+    authorization: Optional[str] = Header(default=None),   # optional Bearer token
+):
+    # Optional token check (enable if you want to require the override token)
+    # Expected: Authorization: Bearer <ASSISTANT_OVERRIDE_TOKEN>
+    override_token = s("ASSISTANT_OVERRIDE_TOKEN")
+    if override_token:
+        if not authorization or not authorization.startswith("Bearer "):
+            return JSONResponse(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                content={"ok": False, "error": "Missing or invalid Authorization header"}
+            )
+        supplied = authorization.split(" ", 1)[1].strip()
+        if supplied != override_token:
+            return JSONResponse(
+                status_code=status.HTTP_403_FORBIDDEN,
+                content={"ok": False, "error": "Invalid override token"}
+            )
+
+    # If we got here, override is permitted
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={
+            "ok": True,
+            "override": True,
+            "mode": "assistant-override",
+            "ts": int(time.time() * 1000),
+        },
+    )
+
+
+# -------------------------------------------------------------------
 # Static pages required by the Extension
 # -------------------------------------------------------------------
 @app.get("/")

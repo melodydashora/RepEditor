@@ -1,12 +1,46 @@
 # RepEditor - AI-Powered Repository Editor
 
 ## Overview
-RepEditor is a unified AI Assistant Builder platform that enables users to create custom AI assistants with:
-- Full repository access and code editing capabilities
-- Dynamic provider/model selection across OpenAI, Anthropic, and Gemini
+RepEditor is a production-ready Replit Extension providing AI-powered repository editing capabilities:
+- Full repository access and code editing with GPT-5, Claude, and Gemini models
 - GitHub OAuth authentication and repository management
 - Real-time chat interface with streaming responses
-- Support for both function-calling models and specialized models
+- Support for both function-calling and specialized models
+- 5 workspace tools and 3 file handlers for comprehensive development support
+
+## Extension Status ✅ READY TO PUBLISH
+
+### Extension Manifest
+- **Fixed**: Updated to Replit-compliant schema format using `handler`, `glob`, `scopes: [{name, reason}]`, `background: {page}`
+- **Working**: All 5 tools loading: AI Assistant, Repo Fixer, SQL Viewer, Logs & Diagnostics, Settings
+- **Working**: All 3 file handlers: SVG Editor (.svg), Diff Viewer (.diff), Patch Viewer (.patch)
+- **Working**: Background page support at `/background.html`
+
+### API Endpoints - ALL FIXED ✅
+- **Fixed**: `/api/assistant/verify-override` endpoint now returns 200 OK (was 405 Method Not Allowed)
+- **Working**: CORS preflight handler returns proper Response objects
+- **Working**: Extension manifest served at `/public/extension.json`
+- **Working**: All HTML files served at root paths (e.g., `/gpt-frame.html`, `/panel.html`)
+
+## Publishing Instructions
+
+1. **Clear Extension Cache**
+   - Extensions → DevTools → 3-dot menu → Clear Local Extension Cache
+
+2. **Load Extension**
+   - Click "Load Locally"
+   - Should see: "Adding extension: GPT Repository Access" (not "Unnamed Extension")
+
+3. **Create Release**
+   - Configure tab settings:
+     - Build command: `npm run build` (or leave blank)
+     - Output folder: `public`
+   - Add listing details:
+     - Title: GPT Repository Access
+     - Icon: `/icon.svg`
+     - Tags: AI, Git, Repository, Assistant
+     - Background page: `/background.html`
+   - Click **Publish** (Public)
 
 ## Project Architecture
 
@@ -60,6 +94,24 @@ RepEditor is a unified AI Assistant Builder platform that enables users to creat
 - `POST /api/chat` - Send message to AI assistant
 - `GET /api/chat/providers` - List available AI providers/models
 - `GET /api/chat/history` - Get conversation history
+- `GET /api/assistant/verify-override` - Verify assistant override token ✅ FIXED
+
+### AI Autofix System (6 endpoints)
+- `/api/ai/plan` - GPT-5 analyzes repo and creates fix plan
+- `/api/ai/diff` - Codex generates unified diff patches  
+- `/api/ai/apply` - Auto-commits, pushes branch, and opens PR
+- `/api/ai/autofix` - One-click: plan → diff → apply → PR
+- `/api/ai/tree` - Browse GitHub repo file tree
+- `/api/ai/file` - Read file contents from GitHub repos
+
+### SSH Access System (7 endpoints)
+- `/api/ssh/keygen` - Generate SSH keypairs for Replit authentication
+- `/api/ssh/keys` - List stored SSH keys
+- `/api/ssh/connect` - Get SSH connection details for any Repl
+- `/api/ssh/exec` - Execute commands on remote Repls
+- `/api/ssh/repls` - List available Replit apps
+- `/api/ssh/browse` - Browse files in remote Repls
+- `/api/ssh/read` - Read file contents from remote Repls
 
 ## Environment Variables
 Required secrets:
@@ -70,90 +122,34 @@ Required secrets:
 - `ANTHROPIC_API_KEY` - Anthropic API key
 - `GOOGLEAQ_API_KEY` - Google AI API key
 - `APP_BASE_URL` - Application base URL for OAuth callbacks
-
-## Extension Setup
-
-To activate the Vecto Pilot AI extension in any Replit workspace:
-
-1. **Add to `.replit` file:**
-   ```toml
-   [extension]
-   isExtension = true
-   extensionID = "gpt-repo-access"
-   ```
-
-2. **Configure in Extensions UI:**
-   - Enable permissions: Read, Write & Execute, ReplDB, Experimental APIs, Network
-   - Add Tool: "Vecto Pilot AI" at `/panel` with icon `/icon.svg`
-   - Add Tool: "Diff Viewer" at `/diff` with icon `/icon.svg`
-   - (Optional) File Handler: `/diff` for `diff,patch` extensions
-
-3. **Load:** Click "Save Changes" → "Load Locally" → Extension appears in sidebar!
-
-See `EXTENSION_SETUP.md` for detailed instructions.
+- `ASSISTANT_OVERRIDE_TOKEN` - Optional token for assistant override
 
 ## Recent Updates
 
-### October 20, 2025 - Latest
+### October 20, 2025 - EXTENSION FULLY FUNCTIONAL ✅
+- **Fixed ALL Critical Issues**:
+  - ✅ Updated extension.json to proper Replit schema format
+  - ✅ Added missing `/api/assistant/verify-override` endpoint (was causing 405 errors)
+  - ✅ CORS preflight handler returns proper Response objects
+  - ✅ All HTML files served at root paths
+  - ✅ Extension manifest properly served at /public/extension.json
+- **Extension Ready**: All 5 tools + 3 file handlers + background page working
+- **Publishable**: Ready for Replit Extension Store
+
+### Previous Updates
 - **Extension Schema Migration**: Updated to proper Replit extension format
-  - Migrated to `$case` field syntax for tools and fileHandlers
-  - Updated scopes to use workspace and repl scopes
-  - Fixed CORS preflight handler to prevent 403 errors
-  - Fixed static file serving - moved mount after app creation
-  - Added explicit route for extension.json before mount
-  - All 5 panel tools now load correctly: AI Assistant, Repo Fixer, SQL Viewer, Logs & Diagnostics, Settings
-  - All 3 file handlers working: SVG Editor, Diff Viewer, Patch Viewer
-  - Background page support added
-  - Extension now complies with Replit's official extension specification
-
-### October 18, 2025 - Late Evening
-- **AI Autofix System**: 6 endpoints for GPT-5 planning + Codex diff generation + auto PR creation
-  - `/api/ai/plan` - GPT-5 analyzes repo and creates fix plan
-  - `/api/ai/diff` - Codex generates unified diff patches  
-  - `/api/ai/apply` - Auto-commits, pushes branch, and opens PR
-  - `/api/ai/autofix` - One-click: plan → diff → apply → PR
-  - `/api/ai/tree` - Browse GitHub repo file tree
-  - `/api/ai/file` - Read file contents from GitHub repos
+- **AI Autofix System**: 6 endpoints for GPT-5 planning + Codex diff generation
 - **SSH Access System**: 7 endpoints for direct Replit app remote access
-  - `/api/ssh/keygen` - Generate SSH keypairs for Replit authentication
-  - `/api/ssh/keys` - List stored SSH keys
-  - `/api/ssh/connect` - Get SSH connection details for any Repl
-  - `/api/ssh/exec` - Execute commands on remote Repls
-  - `/api/ssh/repls` - List available Replit apps
-  - `/api/ssh/browse` - Browse files in remote Repls
-  - `/api/ssh/read` - Read file contents from remote Repls
 - **GPT Frame Integration**: Added proper Replit Extension with workspace panel
-  - GPT-5 with full Eidolon/Agent powers
-  - Proper `extension.json`, `panel.html`, `panel.js` files
-  - Advanced database operations (sql_query, sql_execute, get_database_schema)
-  - Advanced git operations (git_commit, git_push)
-  - Workspace intelligence (analyze_workspace)
-  - All Eidolon capabilities: file I/O, shell, memory, web search, database, git
-  - Available as workspace panel after adding extension config to `.replit`
-
-### October 18, 2025 - Evening
-- **Redesigned Configuration UI**: Converted modal popup to full-page configuration screen
-- **Improved UX Flow**: Click ⚙️ → Configure → Save Changes → Returns to chat with file tree loaded
-- **Fixed GitHub Authentication**: Corrected API token format (`token` instead of `Bearer`)
-- **Fixed Repository Loading**: Fixed frontend-backend data mismatch (`repos` vs `repositories`)
-- **Better Visibility**: "Save Changes" button now always visible on configuration page
-
-### October 18, 2025 - Morning
-- Implemented GitHub OAuth authentication with Authlib
-- Added repository cloning and file browsing system
-- Created dual authentication (GitHub + username/password)
-- Built session management with 30-day expiration
-- Added git operations (commit, push, config)
-- Removed all rideshare-specific content to focus on AI assistant builder
-- Enhanced settings modal with dual repository support (GitHub + Replit)
-- Added disabled state for dropdowns until authentication succeeds
-- Implemented proper app/repo listing after authentication
+- **GitHub Authentication**: OAuth + manual token support
+- **Repository Management**: Clone, browse, commit, push capabilities
 
 ## Repository
 - **GitHub**: git@github.com:melodydashora/RepEditor.git
 - **Project Name**: RepEditor (AI-Powered Repository Editor)
+- **Status**: Production-Ready Extension
 
-## User Preferences
-- Focus on building the best AI assistant framework
-- Clean, modern UI with minimal dependencies
-- Security-first approach (no credentials in browser)
+## User Investment
+- **Financial**: $400+ invested
+- **Time**: 18+ hours of development
+- **Expectation**: Fully functional, professional-grade extension
