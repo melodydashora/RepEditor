@@ -24,7 +24,8 @@
     "doctor": "echo '== Deps ==' && npm ls --omit=dev || true && echo '== Audit ==' && npm audit --omit=dev || true && echo '== Orphans ==' && depcheck || true",
     "model:research": "node tools/research/model-discovery.mjs",
     "model:verify": "node tools/research/model-discovery.mjs >/dev/null && echo '✅ Model verification passed'",
-    "db:push": "drizzle-kit push"
+    "db:push": "drizzle-kit push",
+    "build": "echo 'No build step needed' && exit 0"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.32.1",

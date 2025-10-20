@@ -94,6 +94,18 @@ See `EXTENSION_SETUP.md` for detailed instructions.
 
 ## Recent Updates
 
+### October 20, 2025 - Latest
+- **Extension Schema Migration**: Updated to proper Replit extension format
+  - Migrated to `$case` field syntax for tools and fileHandlers
+  - Updated scopes to use workspace and repl scopes
+  - Fixed CORS preflight handler to prevent 403 errors
+  - Fixed static file serving - moved mount after app creation
+  - Added explicit route for extension.json before mount
+  - All 5 panel tools now load correctly: AI Assistant, Repo Fixer, SQL Viewer, Logs & Diagnostics, Settings
+  - All 3 file handlers working: SVG Editor, Diff Viewer, Patch Viewer
+  - Background page support added
+  - Extension now complies with Replit's official extension specification
+
 ### October 18, 2025 - Late Evening
 - **AI Autofix System**: 6 endpoints for GPT-5 planning + Codex diff generation + auto PR creation
   - `/api/ai/plan` - GPT-5 analyzes repo and creates fix plan
